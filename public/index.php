@@ -53,8 +53,8 @@ foreach ($routeMiddleware as $key => $middleware) {
 // Define the routes
 // ---------------------------------------------------------------------------------------------------------------------
 
-$router->group([], static fn (Router $router) => require_once './routes/web.php');
-$router->group(['prefix' => 'api'], static fn (Router $router) => require_once './routes/api.php');
+$router->group([], static fn (Router $router) => require_once '../routes/web.php');
+$router->group(['prefix' => 'api'], static fn (Router $router) => require_once '../routes/api.php');
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Send the response
