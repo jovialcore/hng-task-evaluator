@@ -5,23 +5,24 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Service\Contracts\Evaluator;
+use Illuminate\Support\LazyCollection;
 
 final class EvaluateService
 {
-    protected array $failed = [];
+    protected ?LazyCollection $failed = null;
 
-    protected array $passed = [];
+    protected ?LazyCollection $passed = null;
 
     public function __construct(protected readonly ResponseValidator $validator)
     {
     }
 
-    public function passedEvaluation(): array
+    public function passedEvaluation(): LazyCollection
     {
         return $this->passed;
     }
 
-    public function failedEvaluation(): array
+    public function failedEvaluation(): LazyCollection
     {
         return $this->failed;
     }
@@ -30,21 +31,25 @@ final class EvaluateService
     {
         $results = $evaluator->fetch($urls);
 
-        foreach ($results as $url => $result) {
-            $this->parseAsyncResponses($result, $url, $evaluator);
-        }
+        $collection = LazyCollection::make(function () use ($results, $evaluator) {
+            foreach ($results as $url => $result) {
+                yield $this->parseAsyncResponses($result, $url, $evaluator);
+            }
+        });
+
+        $this->passed = $collection->filter(fn ($item) => $item['passed']);
+        $this->failed = $collection->filter(fn ($item) => ! $item['passed']);
     }
 
-    private function parseAsyncResponses(array $result, string $url, Evaluator $evaluator): void
+    private function parseAsyncResponses(array $result, string $url, Evaluator $evaluator): array
     {
         /** @var \GuzzleHttp\Psr7\Response $response */
         $response = $result['value'] ?? null;
 
         if ($result['state'] !== 'fulfilled' || $response === null) {
             $errors = [$result['reason']?->getMessage() ?? 'An unknown error occurred'];
-            $this->failed[] = $this->buildPayload($url, $errors, false, []);
 
-            return;
+            return $this->buildPayload($url, $errors, false, []);
         }
 
         ['passed' => $passed, 'errors' => $errors] = $this->validator->validate(
@@ -53,8 +58,7 @@ final class EvaluateService
             $evaluator->messages()
         );
 
-        $key = $passed ? 'passed' : 'failed';
-        $this->{$key}[] = $this->buildPayload($url, $errors, $passed, $evaluator->getContent($response));
+        return $this->buildPayload($url, $errors, $passed, $evaluator->getContent($response));
     }
 
     private function buildPayload(string $url, array $errors = [], bool $passed = false, array $content = []): array

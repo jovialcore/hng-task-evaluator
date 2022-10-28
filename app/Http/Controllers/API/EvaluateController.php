@@ -30,8 +30,8 @@ final class EvaluateController extends Controller
 
         return new JsonResponse([
             'data' => [
-                ...$evaluateService->passedEvaluation(),
-                ...$evaluateService->failedEvaluation(),
+                ...$evaluateService->passedEvaluation()->toArray(),
+                ...$evaluateService->failedEvaluation()->toArray(),
             ],
         ]);
     }
