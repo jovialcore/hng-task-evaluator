@@ -1,18 +1,20 @@
 {
-    "name": "neo/hng-stage1-review",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Neo",
-            "email": "807318+neoighodaro@users.noreply.github.com"
-        }
-    ],
-    "require": {
-        "guzzlehttp/guzzle": "^7.5"
+  "name": "neo/hng-stage1-review",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
     }
+  },
+  "authors": [
+    {
+      "name": "Neo",
+      "email": "807318+neoighodaro@users.noreply.github.com"
+    }
+  ],
+  "require": {
+    "illuminate/events": "^9.37",
+    "illuminate/routing": "^9.37",
+    "illuminate/support": "^9.37"
+  }
 }
