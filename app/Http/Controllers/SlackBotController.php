@@ -8,26 +8,24 @@ use App\Validator;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use GuzzleHttp\RequestOptions;
+use App\Service\EvaluateService;
 
 final class SlackBotController extends Controller
 {
-    public function __invoke(Request $request, Client $client, Validator $validator)
+    public function __invoke(Request $request, Client $client, Validator $validator, EvaluateService $evaluator)
     {
-        $text = $request->get('text');
-        $submittedUrl = preg_match('/https?:\/\/[^\s]+/', $text, $matches) ? $matches[0] : null;
+        $submittedUrl = preg_match('/https?:\/\/[^\s]+/', $request->get('text'), $matches) ? $matches[0] : null;
 
         $url = $validator->validate(['url' => $submittedUrl], ['url' => 'required|url'])['url'];
 
+        $evaluator->evaluate([$url], $this->evaluator());
+
+        $successful = $evaluator->passedEvaluation()->isNotEmpty() && $evaluator->failedEvaluation()->isEmpty();
+        $errors = $evaluator->failedEvaluation()->map(fn (array $item) => $item['errors'])->toArray();
+
         $slackUsername = $request->get('user_name');
-        $responseUrl = $request->get('response_url');
 
-        $successful = false;
-        $errors = [
-            'Slack username must be a string',
-            'Application content-type must be application/json',
-        ];
-
-        $client->post($responseUrl, [
+        $client->post($request->get('response_url'), [
             RequestOptions::JSON => $successful ? $this->successMessage() : $this->failureMessage($errors),
         ]);
 
