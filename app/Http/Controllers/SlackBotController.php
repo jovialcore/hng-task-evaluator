@@ -28,7 +28,7 @@ final class SlackBotController extends Controller
         $evaluator->evaluate([$url], $this->evaluator());
 
         $successful = $evaluator->passedEvaluation()->isNotEmpty() && $evaluator->failedEvaluation()->isEmpty();
-        $errors = $evaluator->failedEvaluation()->map(fn (array $item) => $item['errors'])->toArray();
+        $errors = $evaluator->failedEvaluation()->map(fn (array $item) => $item['errors'])->flatten()->toArray();
 
         $slackUsername = $request->get('user_name');
 
