@@ -13,27 +13,30 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Translation\FileLoader;
 use Illuminate\Translation\Translator;
 use Illuminate\Routing\CallableDispatcher;
+use Illuminate\Contracts\Translation\Translator as TranslatorContract;
 use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
 
 $container = new Container();
+$container->setInstance($container);
+
 $request = Request::capture();
 $router = new Router(new Dispatcher($container), $container);
+$translator = new Translator(new FileLoader(new Filesystem(), '../lang'), 'en');
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Validator
 // ---------------------------------------------------------------------------------------------------------------------
 
-Validator::setInstance(
-    new Validator($container, new Translator(new FileLoader(new Filesystem(), 'lang'), 'en'))
-);
+Validator::setInstance(new Validator($container, $translator));
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Register service container bindings
 // ---------------------------------------------------------------------------------------------------------------------
 
 $container->instance(Request::class, $request);
+$container->instance(TranslatorContract::class, $translator);
+$container->instance(Validator::class, Validator::getInstance());
 $container->instance(CallableDispatcherContract::class, new CallableDispatcher($container));
-$container->singleton(Validator::class, fn () => Validator::getInstance());
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Middleware
