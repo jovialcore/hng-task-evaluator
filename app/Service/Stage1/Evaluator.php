@@ -50,7 +50,7 @@ final class Evaluator implements EvaluatorContract
     public function getContent(Response $response): array
     {
         if (empty($this->content)) {
-            $this->content = json_decode($response->getBody()->getContents(), true);
+            $this->content = json_decode($response->getBody()->getContents(), true) ?? [];
         }
 
         return $this->content;
