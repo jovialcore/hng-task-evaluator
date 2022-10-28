@@ -1,0 +1,6 @@
+{
+  "name": "Heroku: HNG Task Evaluator",
+  "description": "Start the HNG Evaluator on Heroku",
+  "repository": "https://github.com/neoighodaro/hng-task-evaluator",
+  "addons": []
+}
