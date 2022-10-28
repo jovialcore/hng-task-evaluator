@@ -15,6 +15,7 @@
   "require": {
     "illuminate/events": "^9.37",
     "illuminate/routing": "^9.37",
-    "illuminate/support": "^9.37"
+    "illuminate/support": "^9.37",
+    "guzzlehttp/guzzle": "^7.5"
   }
 }
