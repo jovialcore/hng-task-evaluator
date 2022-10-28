@@ -4,7 +4,10 @@
   "autoload": {
     "psr-4": {
       "App\\": "app/"
-    }
+    },
+    "files": [
+      "app/helpers.php"
+    ]
   },
   "authors": [
     {
@@ -16,6 +19,8 @@
     "illuminate/events": "^9.37",
     "illuminate/routing": "^9.37",
     "illuminate/support": "^9.37",
-    "guzzlehttp/guzzle": "^7.5"
+    "guzzlehttp/guzzle": "^7.5",
+    "illuminate/translation": "^9.37",
+    "illuminate/validation": "^9.37"
   }
 }
