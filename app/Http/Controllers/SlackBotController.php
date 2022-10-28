@@ -6,12 +6,19 @@ namespace App\Http\Controllers;
 
 use App\Validator;
 use GuzzleHttp\Client;
+use App\Service\Stage1;
 use Illuminate\Http\Request;
 use GuzzleHttp\RequestOptions;
 use App\Service\EvaluateService;
+use App\Service\Contracts\Evaluator;
 
 final class SlackBotController extends Controller
 {
+    private function evaluator(): Evaluator
+    {
+        return new Stage1\Evaluator();
+    }
+
     public function __invoke(Request $request, Client $client, Validator $validator, EvaluateService $evaluator)
     {
         $submittedUrl = preg_match('/https?:\/\/[^\s]+/', $request->get('text'), $matches) ? $matches[0] : null;
