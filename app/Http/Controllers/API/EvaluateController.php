@@ -22,17 +22,14 @@ final class EvaluateController extends Controller
     public function __invoke(Request $request, EvaluateService $evaluateService, Validator $validator): JsonResponse
     {
         $urls = $validator->validate($request->all(), [
-            'urls' => 'required|array',
+            'urls' => 'required|array|max:1',
             'urls.*' => 'required|url',
         ])['urls'];
 
         $evaluateService->evaluate(array_unique($urls), $this->evaluator());
 
-        return new JsonResponse([
-            'data' => [
-                ...$evaluateService->passedEvaluation()->toArray(),
-                ...$evaluateService->failedEvaluation()->toArray(),
-            ],
-        ]);
+        $results = $evaluateService->passedEvaluation()->merge($evaluateService->failedEvaluation())->toArray();
+
+        return new JsonResponse(['data' => [...$results]]);
     }
 }

@@ -23,3 +23,5 @@ horizon.log
 .idea/
 ray.php
 .php-cs-fixer.cache
+
+urls.txt

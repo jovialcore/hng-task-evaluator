@@ -66,7 +66,7 @@ final class Evaluator implements EvaluatorContract
     protected function http(): Client
     {
         return new Client([
-            'timeout' => 2, 'http_errors' => false, 'connect_timeout' => 1.50,
+            'timeout' => 5, 'http_errors' => false, 'connect_timeout' => 3,
         ]);
     }
 }
