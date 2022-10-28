@@ -22,7 +22,10 @@ final class SlackBotController extends Controller
         $responseUrl = $request->get('response_url');
 
         $successful = false;
-        $errors = [];
+        $errors = [
+            'Slack username must be a string',
+            'Application content-type must be application/json',
+        ];
 
         $client->post($responseUrl, [
             RequestOptions::JSON => $successful ? $this->successMessage() : $this->failureMessage($errors),
