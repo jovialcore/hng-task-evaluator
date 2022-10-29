@@ -15,6 +15,8 @@ final class EvaluateService
 
     public function __construct(protected readonly ResponseValidator $validator)
     {
+        $this->failed = LazyCollection::make();
+        $this->passed = LazyCollection::make();
     }
 
     public function passedEvaluation(): LazyCollection
@@ -25,6 +27,11 @@ final class EvaluateService
     public function failedEvaluation(): LazyCollection
     {
         return $this->failed;
+    }
+
+    public function allSuccessful(): bool
+    {
+        return $this->failedEvaluation()->isEmpty() && $this->passedEvaluation()->isNotEmpty();
     }
 
     public function evaluate(array $urls, Evaluator $evaluator): void
