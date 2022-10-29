@@ -9,15 +9,13 @@ use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 /** @var \Illuminate\Routing\Router $router */
 $router->post('/slackbot', SlackBotController::class);
 
-$router->get('/passed', function () {
-    return new Response(
-        file_get_contents(PROJECT_ROOT_PATH.'/storage/passed.csv'),
-        HttpFoundationResponse::HTTP_OK,
-        [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="passed.csv"',
-        ]
-    );
-});
+$router->get('/passed', fn () => new Response(
+    file_get_contents(PROJECT_ROOT_PATH.'/storage/passed.csv'),
+    HttpFoundationResponse::HTTP_OK,
+    [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="passed.csv"',
+    ]
+));
 
 $router->get('/', fn () => 'Hello World');
