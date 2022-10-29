@@ -28,7 +28,6 @@ final class Evaluator implements EvaluatorContract
     {
         return [
             // API response field validation
-            'id' => ['required', 'integer'],
             'bio' => ['required', 'string'],
             'age' => ['required', 'integer'],
             'backend' => ['required', 'boolean'],
