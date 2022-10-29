@@ -16,6 +16,8 @@ use Illuminate\Routing\CallableDispatcher;
 use Illuminate\Contracts\Translation\Translator as TranslatorContract;
 use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
 
+define('PROJECT_ROOT_PATH', realpath(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR));
+
 $container = new Container();
 $container->setInstance($container);
 

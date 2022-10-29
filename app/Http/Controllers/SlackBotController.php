@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Validator;
-use GuzzleHttp\Client;
 use App\Service\Stage1;
 use Illuminate\Http\Request;
-use GuzzleHttp\RequestOptions;
+use App\Service\SlackService;
+use Illuminate\Http\Response;
 use App\Service\EvaluateService;
 use App\Service\Contracts\Evaluator;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 final class SlackBotController extends Controller
 {
@@ -19,67 +21,52 @@ final class SlackBotController extends Controller
         return new Stage1\Evaluator();
     }
 
-    public function __invoke(Request $request, Client $client, Validator $validator, EvaluateService $evaluator)
+    public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
-        $submittedUrl = preg_match('/https?:\/\/[^\s]+/', $request->get('text'), $matches) ? $matches[0] : null;
+        $errors = [];
 
-        $url = $validator->validate(['url' => $submittedUrl], ['url' => 'required|url'])['url'];
+        try {
+            $data = $this->validate($request);
+            $evaluateService->evaluate([$data['url']], $this->evaluator());
+        } catch (ValidationException $e) {
+            $errors = $e->validator->errors()->all();
 
-        $evaluator->evaluate([$url], $this->evaluator());
+            if ($e->validator->errors()->has('response_url')) {
+                return new Response('Nope. We are not doing this', HttpFoundationResponse::HTTP_FORBIDDEN);
+            }
+        }
 
-        $successful = $evaluator->passedEvaluation()->isNotEmpty() && $evaluator->failedEvaluation()->isEmpty();
-        $errors = $evaluator->failedEvaluation()->map(fn (array $item) => $item['errors'])->flatten()->toArray();
+        $this->writeToCsv($request, $evaluateService, $errors);
+        $this->sendToSlack($slack, $request, $evaluateService, $errors);
 
-        $slackUsername = $request->get('user_name');
-
-        $client->post($request->get('response_url'), [
-            RequestOptions::JSON => $successful ? $this->successMessage() : $this->failureMessage($errors),
-        ]);
-
-        return '';
+        return new Response();
     }
 
-    protected function successMessage(): array
+    protected function validate(Request $request): array
     {
-        return [
-            'response_type' => 'ephemeral',
-            'blocks' => [
-                [
-                    'type' => 'section',
-                    'text' => [
-                        'emoji' => true,
-                        'type' => 'plain_text',
-                        'text' => '🎉🥳 Your task was validated and submitted! Congrats!',
-                    ],
-                ],
-            ],
-        ];
+        $submittedUrl = preg_match('/https?:\/\/[^\s]+/', $request->get('text'), $matches) ? $matches[0] : 'invalid';
+
+        return Validator::make(
+            ['url' => $submittedUrl, 'response_url' => $request->get('response_url')],
+            ['url' => 'required|url', 'response_url' => 'required|url|starts_with:https://hooks.slack.com'],
+            ['response_url.starts_with' => 'Nice try.'],
+        )->validate();
     }
 
-    protected function failureMessage(array $errors): array
+    protected function writeToCsv(Request $request, EvaluateService $evaluateService, array $errors): void
     {
-        return [
-            'response_type' => 'ephemeral',
-            'blocks' => [
-                [
-                    'type' => 'section',
-                    'text' => [
-                        'emoji' => true,
-                        'type' => 'plain_text',
-                        'text' => '❌ Your task verification failed. Sorry.',
-                    ],
-                ],
-                [
-                    'type' => 'divider',
-                ],
-                [
-                    'type' => 'section',
-                    'text' => [
-                        'type' => 'mrkdwn',
-                        'text' => implode("\n", array_map(static fn (string $error) => "- {$error}", $errors)),
-                    ],
-                ],
-            ],
-        ];
+        if (empty($errors)) {
+            $submitter = $request->get('user_name');
+            $evaluateService->writeToCsv($submitter);
+        }
+    }
+
+    protected function sendToSlack(SlackService $slack, Request $request, EvaluateService $evaluate, array $errors): void
+    {
+        $hook = $request->get('response_url');
+        $passed = empty($errors) && $evaluate->allSuccessful();
+        $errors = $passed ? [] : [...$evaluate->failedErrors(), ...$errors];
+
+        $slack->sendEvaluationResult($hook, $passed, $errors);
     }
 }
