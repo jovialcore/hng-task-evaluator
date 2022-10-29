@@ -19,7 +19,8 @@
     "guzzlehttp/guzzle": "^7.5",
     "illuminate/translation": "^9.37",
     "illuminate/validation": "^9.37",
-    "league/csv": "^9.0"
+    "league/csv": "^9.0",
+    "filp/whoops": "^2.14"
   },
   "require-dev": {
     "heroku/heroku-buildpack-php": "^226.0"
