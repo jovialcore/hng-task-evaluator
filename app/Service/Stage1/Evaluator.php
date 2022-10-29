@@ -35,7 +35,7 @@ final class Evaluator implements EvaluatorContract
 
             // Server response header validation
             'status_code' => ['required', 'integer', 'in:200'],
-            'content_type' => ['required', 'string', 'in:application/json'],
+            'content_type' => ['required', 'string', 'regex:/^application\/json/'],
         ];
     }
 
