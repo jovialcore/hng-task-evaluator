@@ -30,7 +30,7 @@ final class SlackService
                     'text' => [
                         'emoji' => true,
                         'type' => 'plain_text',
-                        'text' => '🎉🥳 Your task was validated and submitted! Congrats!',
+                        'text' => '🎉🥳 Your task was validated and submitted! Congrats! You do NOT need to do anything more but wait for promotion to the next stage.',
                     ],
                 ],
                 [
