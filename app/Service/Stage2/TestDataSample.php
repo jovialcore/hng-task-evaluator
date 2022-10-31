@@ -41,6 +41,10 @@ final class TestDataSample implements Arrayable
     public function __construct(bool $bonus = false)
     {
         $this->data = $bonus ? $this->bonus : $this->normal;
+
+        if (APP_DEBUG) {
+            $this->data = $bonus ? [$this->bonus[0]] : [$this->normal[0]];
+        }
     }
 
     public function random(): array

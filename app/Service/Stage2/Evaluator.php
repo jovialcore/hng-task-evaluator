@@ -6,6 +6,7 @@ namespace App\Service\Stage2;
 
 use Illuminate\Support\Arr;
 use GuzzleHttp\Promise\Utils;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use App\Rule\ExpectedEvaluationResult;
 use App\Service\Concerns\HandlesAndProvidesData;
@@ -42,10 +43,14 @@ final class Evaluator implements EvaluatorContract
         ];
     }
 
-    public function fetch(array $urls): array
+    public function fetch(array $urls, bool $debug = false): array
     {
         $data = Arr::except($this->data, 'result');
         $dataBonus = Arr::except($this->dataBonus, 'result');
+
+        if ($debug) {
+            return $this->fetchDebug();
+        }
 
         return Utils::settle(
             collect($urls)->mapWithKeys(function (string $url) use ($data, $dataBonus) {
@@ -59,6 +64,30 @@ final class Evaluator implements EvaluatorContract
                 ];
             })->toArray()
         )->wait();
+    }
+
+    public function fetchDebug(): array
+    {
+        $this->evaluationData['https://api.example.com/1'] = $this->data;
+        $this->evaluationData['https://api.example.com/1?bonus=true'] = $this->dataBonus;
+
+        // mock response
+        return [
+            'https://api.example.com/1' => [
+                'value' => new Response(200, ['Content-Type' => 'application/json'], json_encode([
+                    'result' => 3,
+                    'operation_type' => 'addition',
+                ])),
+                'state' => 'fulfilled',
+            ],
+            'https://api.example.com/1?bonus=true' => [
+                'value' => new Response(200, ['Content-Type' => 'application/json'], json_encode([
+                    'result' => 25,
+                    'operation_type' => 'multiplication',
+                ])),
+                'state' => 'fulfilled',
+            ],
+        ];
     }
 
     public function messages(): array
