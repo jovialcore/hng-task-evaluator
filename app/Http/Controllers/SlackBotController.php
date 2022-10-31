@@ -5,29 +5,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Validator;
-use App\Service\Stage1;
 use Illuminate\Http\Request;
 use App\Service\SlackService;
 use Illuminate\Http\Response;
 use App\Service\EvaluateService;
-use App\Service\Contracts\Evaluator;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 final class SlackBotController extends Controller
 {
-    private function evaluator(): Evaluator
-    {
-        return new Stage1\Evaluator();
-    }
-
     public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
         $errors = [];
 
         try {
             $data = $this->validate($request);
-            $evaluateService->evaluate([$data['url']], $this->evaluator());
+            $stage = intval($request->route('stage'));
+            $evaluateService->evaluate([$data['url']], $this->evaluator($stage));
         } catch (ValidationException $e) {
             $errors = $e->validator->errors()->all();
 
