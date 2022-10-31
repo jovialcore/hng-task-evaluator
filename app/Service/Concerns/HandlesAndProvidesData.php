@@ -43,7 +43,7 @@ trait HandlesAndProvidesData
 
     public function getEvaluationData(string $url): array
     {
-        return $this->evaluationData[$url];
+        return $this->evaluationData[$url] ?? [];
     }
 
     protected function http(): Client
