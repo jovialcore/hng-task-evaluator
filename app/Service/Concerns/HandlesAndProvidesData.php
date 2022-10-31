@@ -52,4 +52,18 @@ trait HandlesAndProvidesData
             'timeout' => 5, 'http_errors' => false, 'connect_timeout' => 3,
         ]);
     }
+
+    public function csvHeaderColumns(): array
+    {
+        return ['url', 'response', 'passed'];
+    }
+
+    public function csvLine(array $item): array
+    {
+        $url = $item['url'];
+        $content = json_encode($item['content']);
+        $passed = $item['passed'] ? 'true' : 'false';
+
+        return [$url, $content, $passed];
+    }
 }

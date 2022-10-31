@@ -7,6 +7,7 @@ use App\Http\Controllers\SlackBotController;
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 /** @var \Illuminate\Routing\Router $router */
+$router->post('/slackbot/{stage}', SlackBotController::class);
 $router->post('/slackbot', SlackBotController::class);
 
 $router->get('/passed', fn () => new Response(

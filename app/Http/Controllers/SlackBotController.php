@@ -14,10 +14,14 @@ use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 final class SlackBotController extends Controller
 {
+    /**
+     * @throws \League\Csv\CannotInsertRecord
+     */
     public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
         $errors = [];
-        $evaluator = $this->evaluator(intval($request->route('stage', 1)));
+        $stage = intval($request->route('stage', 1));
+        $evaluator = $this->evaluator($stage);
 
         try {
             $data = $this->validate($request);
@@ -30,7 +34,10 @@ final class SlackBotController extends Controller
             }
         }
 
-        $this->writeToCsv($evaluator->csvFilePath(), $request, $evaluateService, $errors);
+        if (empty($errors)) {
+            $this->writeToCsv($request, $evaluateService, $stage === 1);
+        }
+
         $this->sendToSlack($slack, $request, $evaluateService, $errors);
 
         return new Response();
@@ -47,12 +54,24 @@ final class SlackBotController extends Controller
         )->validate();
     }
 
-    protected function writeToCsv(string $path, Request $request, EvaluateService $evaluateService, array $errors): void
+    /**
+     * @throws \League\Csv\CannotInsertRecord
+     */
+    protected function writeToCsv(Request $request, EvaluateService $service, bool $isStageOne): void
     {
-        if (empty($errors)) {
-            $submitter = $request->get('user_name');
-            $evaluateService->writeToCsv($path, $submitter);
+        $slackUsername = $request->get('user_name');
+        $additionalData = [
+            'headers' => ['slackProfileUrl', 'slackUsername'],
+            'line' => ['https://slack.com/team/'.$request->get('user_id'), $slackUsername],
+        ];
+
+        // Maintain backwards compatibility
+        if ($isStageOne) {
+            $additionalData['headers'] = ['submitter'];
+            $additionalData['line'] = [$slackUsername];
         }
+
+        $service->writeToCsv($additionalData);
     }
 
     protected function sendToSlack(SlackService $slack, Request $request, EvaluateService $evaluate, array $errors): void

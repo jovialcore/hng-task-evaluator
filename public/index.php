@@ -18,7 +18,8 @@ use Illuminate\Routing\CallableDispatcher;
 use Illuminate\Contracts\Translation\Translator as TranslatorContract;
 use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
 
-defined('PROJECT_ROOT_PATH') or define('PROJECT_ROOT_PATH', __DIR__.'/..');
+defined('APP_DEBUG') || define('APP_DEBUG', true);
+defined('PROJECT_ROOT_PATH') || define('PROJECT_ROOT_PATH', __DIR__.'/..');
 
 $container = new Container();
 $container->setInstance($container);

@@ -21,4 +21,8 @@ interface Evaluator
     public function getEvaluationData(string $url): array;
 
     public function csvFilePath(): string;
+
+    public function csvHeaderColumns(): array;
+
+    public function csvLine(array $item): array;
 }
