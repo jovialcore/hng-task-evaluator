@@ -6,7 +6,6 @@ namespace App\Service\Stage2;
 
 use Illuminate\Support\Arr;
 use GuzzleHttp\Promise\Utils;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use App\Rule\ExpectedEvaluationResult;
 use App\Service\Concerns\HandlesAndProvidesData;
@@ -65,5 +64,10 @@ final class Evaluator implements EvaluatorContract
     public function messages(): array
     {
         return [];
+    }
+
+    public function csvFilePath(): string
+    {
+        return PROJECT_ROOT_PATH.'/storage/passed2.csv';
     }
 }

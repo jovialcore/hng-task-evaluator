@@ -17,11 +17,11 @@ final class SlackBotController extends Controller
     public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
         $errors = [];
+        $evaluator = $this->evaluator(intval($request->route('stage')));
 
         try {
             $data = $this->validate($request);
-            $stage = intval($request->route('stage'));
-            $evaluateService->evaluate([$data['url']], $this->evaluator($stage));
+            $evaluateService->evaluate([$data['url']], $evaluator);
         } catch (ValidationException $e) {
             $errors = $e->validator->errors()->all();
 
@@ -30,7 +30,7 @@ final class SlackBotController extends Controller
             }
         }
 
-        $this->writeToCsv($request, $evaluateService, $errors);
+        $this->writeToCsv($evaluator->csvFilePath(), $request, $evaluateService, $errors);
         $this->sendToSlack($slack, $request, $evaluateService, $errors);
 
         return new Response();
@@ -47,11 +47,11 @@ final class SlackBotController extends Controller
         )->validate();
     }
 
-    protected function writeToCsv(Request $request, EvaluateService $evaluateService, array $errors): void
+    protected function writeToCsv(string $path, Request $request, EvaluateService $evaluateService, array $errors): void
     {
         if (empty($errors)) {
             $submitter = $request->get('user_name');
-            $evaluateService->writeToCsv($submitter);
+            $evaluateService->writeToCsv($path, $submitter);
         }
     }
 
