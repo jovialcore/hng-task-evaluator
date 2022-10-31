@@ -32,4 +32,9 @@ final class Evaluator implements EvaluatorContract
             'in' => 'The :attribute must be one of the following types: :values',
         ];
     }
+
+    public function csvFilePath(): string
+    {
+        return PROJECT_ROOT_PATH.'/storage/passed.csv';
+    }
 }

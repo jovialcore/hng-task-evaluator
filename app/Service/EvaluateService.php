@@ -12,10 +12,7 @@ use Illuminate\Support\LazyCollection;
 final class EvaluateService
 {
     protected ?LazyCollection $failed = null;
-
     protected ?LazyCollection $passed = null;
-
-    protected string $csvSaveFile = PROJECT_ROOT_PATH.'/storage/passed.csv';
 
     public function __construct(protected readonly ResponseValidator $validator)
     {
@@ -57,7 +54,7 @@ final class EvaluateService
         $this->failed = $collection->filter(fn ($item) => ! $item['passed']);
     }
 
-    public function writeToCsv(?string $submitter = null): void
+    public function writeToCsv(string $filePath, ?string $submitter = null): void
     {
         if (! $this->allSuccessful()) {
             return;
@@ -65,11 +62,11 @@ final class EvaluateService
 
         $evaluations = $this->passedEvaluation();
 
-        $csvFileExists = file_exists($this->csvSaveFile);
+        $csvFileExists = file_exists($filePath);
         $csvHeaderColumns = ['submitter', 'slackUsername', 'url', 'response', 'passed'];
 
         if ($csvFileExists) {
-            $existingUrls = $this->getUniqueUrlHashMap($evaluations, $csvHeaderColumns);
+            $existingUrls = $this->getUniqueUrlHashMap($filePath, $evaluations, $csvHeaderColumns);
             $evaluations = $evaluations->filter(fn (array $item) => ! ($existingUrls[$item['url']] ?? false));
         }
 
@@ -77,7 +74,7 @@ final class EvaluateService
             return;
         }
 
-        $writer = Writer::createFromPath($this->csvSaveFile, 'a+');
+        $writer = Writer::createFromPath($filePath, 'a+');
 
         if (! $csvFileExists) {
             $writer->insertOne($csvHeaderColumns);
@@ -91,16 +88,22 @@ final class EvaluateService
         $writer->insertAll($lines);
     }
 
-    private function getUniqueUrlHashMap(LazyCollection $evaluations, array $header): array
+    public function normalizeUrl(string $url): string
+    {
+        return rtrim(explode('?', $url)[0], '/').'/';
+    }
+
+    private function getUniqueUrlHashMap(string $filePath, LazyCollection $evaluations, array $header): array
     {
         $urls = [];
-        $insertUrls = $evaluations->map(fn (array $item) => $item['url'])->toArray();
+        $insertUrls = $evaluations->map(fn (array $item) => $this->normalizeUrl($item['url']))->toArray();
 
-        $reader = Reader::createFromStream(fopen($this->csvSaveFile, 'r+'))->setHeaderOffset(0);
+        $reader = Reader::createFromStream(fopen($filePath, 'r+'))->setHeaderOffset(0);
         $records = $reader->getRecords($header);
 
         foreach ($records as $record) {
-            $urls[$record['url']] = in_array($record['url'], $insertUrls);
+            $url = $this->normalizeUrl($record['url']);
+            $urls[$url] = in_array($url, $insertUrls);
         }
 
         return array_filter($urls, static fn (bool $item) => $item);
