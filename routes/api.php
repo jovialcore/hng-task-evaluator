@@ -7,4 +7,4 @@ declare(strict_types=1);
 use App\Http\Controllers\API\EvaluateController;
 
 $router->post('/backend/evaluate/{stage}', EvaluateController::class)->whereNumber('stage');
-$router->redirect('/backend/evaluate', '/backend/evaluate/1');
+$router->post('/backend/evaluate', EvaluateController::class);
