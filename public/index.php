@@ -4,19 +4,21 @@ require_once '../vendor/autoload.php';
 
 use App\Validator;
 use Illuminate\Http\Request;
+use Whoops\Run as WhoopsRun;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\Pipeline;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use App\Http\Middleware\TrimStrings;
 use Illuminate\Filesystem\Filesystem;
+use Whoops\Handler\PrettyPageHandler;
 use Illuminate\Translation\FileLoader;
 use Illuminate\Translation\Translator;
 use Illuminate\Routing\CallableDispatcher;
 use Illuminate\Contracts\Translation\Translator as TranslatorContract;
 use Illuminate\Routing\Contracts\CallableDispatcher as CallableDispatcherContract;
 
-define('PROJECT_ROOT_PATH', __DIR__.'/..');
+defined('PROJECT_ROOT_PATH') or define('PROJECT_ROOT_PATH', __DIR__.'/..');
 
 $container = new Container();
 $container->setInstance($container);
@@ -29,8 +31,8 @@ $translator = new Translator(new FileLoader(new Filesystem(), '../lang'), 'en');
 // Error
 // ---------------------------------------------------------------------------------------------------------------------
 
-$whoops = new \Whoops\Run();
-$whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler());
+$whoops = new WhoopsRun();
+$whoops->pushHandler(new PrettyPageHandler());
 $whoops->register();
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -52,15 +54,11 @@ $container->instance(CallableDispatcherContract::class, new CallableDispatcher($
 // Middleware
 // ---------------------------------------------------------------------------------------------------------------------
 
-$globalMiddleware = [
-    TrimStrings::class,
-];
-
-$routeMiddleware = [];
-
-foreach ($routeMiddleware as $key => $middleware) {
-    $router->aliasMiddleware($key, $middleware);
-}
+collect([
+    // 'trimStrings' => TrimStrings::class,
+])->each(
+    fn ($middleware, $key) => $router->aliasMiddleware($key, $middleware)
+);
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Define the routes
@@ -75,7 +73,9 @@ $router->group(['prefix' => 'api'], static fn (Router $router) => require_once '
 
 $response = (new Pipeline($container))
     ->send($request)
-    ->through($globalMiddleware)
+    ->through([
+        TrimStrings::class,
+    ])
     ->then(function ($request) use ($router) {
         return $router->dispatch($request);
     });

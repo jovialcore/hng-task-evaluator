@@ -138,12 +138,17 @@ final class EvaluateService
         }
 
         ['passed' => $passed, 'errors' => $errors] = $this->validator->validate(
-            $evaluator->data($response),
-            $evaluator->rules(),
+            $evaluator->data($response, $url),
+            $evaluator->rules($url),
             $evaluator->messages()
         );
 
-        return $this->buildPayload($url, $errors, $passed, $evaluator->getContent($response));
+        $content = [
+            'request' => $evaluator->getEvaluationData($url),
+            'response' => $evaluator->getContent($response, $url),
+        ];
+
+        return $this->buildPayload($url, $errors, $passed, $content);
     }
 
     private function buildPayload(string $url, array $errors = [], bool $passed = false, array $content = []): array
