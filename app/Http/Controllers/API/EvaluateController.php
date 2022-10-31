@@ -14,7 +14,7 @@ final class EvaluateController extends Controller
 {
     public function __invoke(Request $request, EvaluateService $evaluateService, Validator $validator): JsonResponse
     {
-        $stage = intval($request->route('stage'));
+        $stage = intval($request->route('stage', 1));
         $urls = $validator->validate($request->all(), [
             'urls' => 'required|array|max:1',
             'urls.*' => 'required|url',

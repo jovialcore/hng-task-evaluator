@@ -17,7 +17,7 @@ final class SlackBotController extends Controller
     public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
         $errors = [];
-        $evaluator = $this->evaluator(intval($request->route('stage')));
+        $evaluator = $this->evaluator(intval($request->route('stage', 1)));
 
         try {
             $data = $this->validate($request);
