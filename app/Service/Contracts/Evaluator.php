@@ -8,13 +8,15 @@ use GuzzleHttp\Psr7\Response;
 
 interface Evaluator
 {
-    public function rules(): array;
+    public function rules(string $url): array;
 
-    public function data(Response $response): array;
+    public function data(Response $response, string $url): array;
 
     public function fetch(array $urls): array;
 
     public function messages(): array;
 
-    public function getContent(Response $response): array;
+    public function getContent(Response $response, string $url): array;
+
+    public function getEvaluationData(string $url): array;
 }
