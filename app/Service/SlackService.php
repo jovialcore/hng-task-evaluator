@@ -41,11 +41,8 @@ final class SlackService
                     'text' => [
                         'emoji' => true,
                         'type' => 'plain_text',
-                        'text' => '🥲 This stage sumission deadline has passed sorry!',
+                        'text' => "🥲 Sorry, submission is closed. Please don't send another request to grade for Stage 1. Don't make me bring out cane. Thanks.",
                     ],
-                ],
-                [
-                    'type' => 'divider',
                 ],
             ],
         ];
