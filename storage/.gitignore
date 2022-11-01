@@ -1,2 +1,4 @@
 *
 !.gitignore
+!passed.csv
+!passed2.csv

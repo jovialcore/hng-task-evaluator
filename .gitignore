@@ -23,5 +23,3 @@ horizon.log
 .idea/
 ray.php
 .php-cs-fixer.cache
-storage/passed.csv
-urls.txt

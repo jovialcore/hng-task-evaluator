@@ -21,6 +21,13 @@ final class SlackBotController extends Controller
     {
         $errors = [];
         $stage = intval($request->route('stage', 1));
+
+        if ($this->stageHasEnded($stage)) {
+            $slack->sendStageHasEndedMessage($request->get('response_url', ''));
+
+            return new Response();
+        }
+
         $evaluator = $this->evaluator($stage);
 
         try {
@@ -52,6 +59,11 @@ final class SlackBotController extends Controller
             ['url' => 'required|url', 'response_url' => 'required|url|starts_with:https://hooks.slack.com'],
             ['response_url.starts_with' => 'Nice try.'],
         )->validate();
+    }
+
+    protected function stageHasEnded(int $stage): bool
+    {
+        return $stage === 1;
     }
 
     /**
