@@ -20,6 +20,37 @@ final class SlackService
         ]);
     }
 
+    public function sendStageHasEndedMessage(string $hook): void
+    {
+        if (! $hook) {
+            return;
+        }
+
+        $this->client->post($hook, [
+            RequestOptions::JSON => $this->stageHasEndedMessage(),
+        ]);
+    }
+
+    protected function stageHasEndedMessage(): array
+    {
+        return [
+            'response_type' => 'ephemeral',
+            'blocks' => [
+                [
+                    'type' => 'section',
+                    'text' => [
+                        'emoji' => true,
+                        'type' => 'plain_text',
+                        'text' => '🥲 This stage sumission deadline has passed sorry!',
+                    ],
+                ],
+                [
+                    'type' => 'divider',
+                ],
+            ],
+        ];
+    }
+
     protected function successMessage(): array
     {
         return [
