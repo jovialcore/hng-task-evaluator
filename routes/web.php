@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
 
 /** @var \Illuminate\Routing\Router $router */
 $router->post('/slackbot/{stage}', SlackBotController::class);
-$router->post('/slackbot', SlackBotController::class);
+$router->post('/slackbot/2', SlackBotController::class);
 
 $router->get('/passed', fn () => new Response(
     file_get_contents(PROJECT_ROOT_PATH.'/storage/passed.csv'),
