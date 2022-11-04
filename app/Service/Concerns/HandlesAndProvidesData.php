@@ -27,10 +27,17 @@ trait HandlesAndProvidesData
 
     public function getContent(Response $response, string $url): array
     {
-        if (empty($this->content[$url] ?? null)) {
+        $content = $this->getContentForUrl($url);
+
+        if (empty($content)) {
             $this->content[$url] = (array) json_decode($response->getBody()->getContents(), true) ?? [];
         }
 
+        return $this->content[$url];
+    }
+
+    public function getContentForUrl(string $url): array
+    {
         return $this->content[$url] ?? [];
     }
 
@@ -55,7 +62,7 @@ trait HandlesAndProvidesData
 
     public function csvHeaderColumns(): array
     {
-        return ['url', 'response', 'passed'];
+        return ['slackUsername', 'url', 'response', 'passed'];
     }
 
     public function csvLine(array $item): array
@@ -63,7 +70,8 @@ trait HandlesAndProvidesData
         $url = $item['url'];
         $content = json_encode($item['content']);
         $passed = $item['passed'] ? 'true' : 'false';
+        $username = $item['content']['response']['slackUsername'];
 
-        return [$url, $content, $passed];
+        return [$username, $url, $content, $passed];
     }
 }

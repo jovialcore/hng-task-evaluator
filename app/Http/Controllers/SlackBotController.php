@@ -42,7 +42,11 @@ final class SlackBotController extends Controller
         }
 
         if (empty($errors)) {
-            $this->writeToCsv($request, $evaluateService, $stage === 1);
+            $result = $this->writeToCsv($request, $evaluateService, $stage === 1);
+
+            if ($result === null) {
+                $errors[] = 'You already submitted this URL.';
+            }
         }
 
         $this->sendToSlack($slack, $request, $evaluateService, $errors);
@@ -69,12 +73,12 @@ final class SlackBotController extends Controller
     /**
      * @throws \League\Csv\CannotInsertRecord
      */
-    protected function writeToCsv(Request $request, EvaluateService $service, bool $isStageOne): void
+    protected function writeToCsv(Request $request, EvaluateService $service, bool $isStageOne): ?bool
     {
         $slackUsername = $request->get('user_name');
         $additionalData = [
-            'headers' => ['slackProfileUrl', 'slackUsername'],
-            'line' => ['https://slack.com/team/'.$request->get('user_id'), $slackUsername],
+            'headers' => ['slackProfileUrl'],
+            'line' => ['https://hng9.slack.com/team/'.$request->get('user_id')],
         ];
 
         // Maintain backwards compatibility
@@ -83,14 +87,14 @@ final class SlackBotController extends Controller
             $additionalData['line'] = [$slackUsername];
         }
 
-        $service->writeToCsv($additionalData);
+        return $service->writeToCsv($additionalData, ['filterIgnorableErrors' => ! $isStageOne]);
     }
 
     protected function sendToSlack(SlackService $slack, Request $request, EvaluateService $evaluate, array $errors): void
     {
         $hook = $request->get('response_url');
-        $passed = empty($errors) && $evaluate->allSuccessful();
-        $errors = $passed ? [] : [...$evaluate->failedErrors(), ...$errors];
+        $passed = empty($errors) && $evaluate->allSuccessful(filterIgnorableErrors: true);
+        $errors = $passed ? [] : [...$evaluate->failedErrors(filterIgnorableErrors: true), ...$errors];
 
         $slack->sendEvaluationResult($hook, $passed, $errors);
     }

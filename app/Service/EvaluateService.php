@@ -31,14 +31,17 @@ final class EvaluateService
         return $this->failed;
     }
 
-    public function failedErrors(): array
+    public function failedErrors(bool $filterIgnorableErrors = false): array
     {
-        return $this->failed->map(fn (array $item) => $item['errors'])->flatten()->toArray();
+        return $this->failed->when(
+            $filterIgnorableErrors,
+            static fn (LazyCollection $items) => $items->filter(fn (array $item) => $item['canIgnore'] === false)
+        )->map(fn (array $item) => $item['errors'])->flatten()->all();
     }
 
-    public function allSuccessful(): bool
+    public function allSuccessful(bool $filterIgnorableErrors = false): bool
     {
-        return $this->failedEvaluation()->isEmpty() && $this->passedEvaluation()->isNotEmpty();
+        return empty($this->failedErrors($filterIgnorableErrors)) && $this->passedEvaluation()->isNotEmpty();
     }
 
     public function evaluate(array $urls, Evaluator $evaluator): void
@@ -59,10 +62,10 @@ final class EvaluateService
     /**
      * @throws \League\Csv\CannotInsertRecord
      */
-    public function writeToCsv(array $additional = []): void
+    public function writeToCsv(array $additional = [], array $options = []): ?bool
     {
-        if (! $this->allSuccessful()) {
-            return;
+        if (! $this->allSuccessful($options['filterIgnorableErrors'] ?? false)) {
+            return false;
         }
 
         $evaluations = $this->passedEvaluation();
@@ -81,7 +84,7 @@ final class EvaluateService
         }
 
         if ($evaluations->isEmpty()) {
-            return;
+            return null;
         }
 
         $writer = Writer::createFromPath($this->evaluator->csvFilePath(), 'a+');
@@ -93,6 +96,8 @@ final class EvaluateService
         $writer->insertAll(
             array_map(fn (array $line) => array_merge($additionalLineItem, $line), $this->getCsvLines($evaluations))
         );
+
+        return true;
     }
 
     public function normalizeUrl(string $url): string
@@ -150,16 +155,17 @@ final class EvaluateService
             $evaluator->messages()
         );
 
+        $isBonus = str_contains($url, '?bonus=true');
         $content = [
             'request' => $evaluator->getEvaluationData($url),
             'response' => $evaluator->getContent($response, $url),
         ];
 
-        return $this->buildPayload($url, $errors, $passed, $content);
+        return $this->buildPayload($url, $errors, $passed, $content, canIgnore: $isBonus);
     }
 
-    private function buildPayload(string $url, array $errors = [], bool $passed = false, array $content = []): array
+    private function buildPayload(string $url, array $errors, bool $passed, array $content, bool $canIgnore = false): array
     {
-        return ['url' => $url, 'content' => $content, 'passed' => $passed, 'errors' => $errors];
+        return compact('url', 'errors', 'passed', 'content', 'canIgnore');
     }
 }
