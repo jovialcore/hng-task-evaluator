@@ -59,8 +59,8 @@ final class Evaluator implements EvaluatorContract
                 $this->evaluationData[$bonusUrl] = $this->dataBonus;
 
                 return [
-                    $url => $this->http()->postAsync($url, [RequestOptions::FORM_PARAMS => $data]),
-                    $bonusUrl => $this->http()->postAsync($bonusUrl, [RequestOptions::FORM_PARAMS => $dataBonus]),
+                    $url => $this->http()->postAsync($url, [RequestOptions::JSON => $data]),
+                    $bonusUrl => $this->http()->postAsync($bonusUrl, [RequestOptions::JSON => $dataBonus]),
                 ];
             })->toArray()
         )->wait();
@@ -98,5 +98,28 @@ final class Evaluator implements EvaluatorContract
     public function csvFilePath(): string
     {
         return PROJECT_ROOT_PATH.'/storage/passed2.csv';
+    }
+
+    public function csvHeaderColumns(): array
+    {
+        return ['slackUsername', 'url', 'response', 'passed', 'passedBonus'];
+    }
+
+    public function csvLine(array $item): array
+    {
+        $url = $item['url'];
+        $passed = $item['passed'] ? 'true' : 'false';
+        $username = $item['content']['response']['slackUsername'];
+        $content = ['normal' => [...$item['content']], 'bonus' => []];
+        $bonusData = $this->getEvaluationData($item['url'].'?bonus=true');
+
+        if (! empty($bonusData)) {
+            $content['bonus'] = [...$this->getContentForUrl($item['url'].'?bonus=true')];
+            $passedBonus = isset($bonusData['passed']) && $bonusData['passed'] ? 'true' : 'false';
+        }
+
+        $content = json_encode($content);
+
+        return [$username, $url, $content, $passed, $passedBonus ?? 'false'];
     }
 }

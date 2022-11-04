@@ -18,6 +18,8 @@ interface Evaluator
 
     public function getContent(Response $response, string $url): array;
 
+    public function getContentForUrl(string $url): array;
+
     public function getEvaluationData(string $url): array;
 
     public function csvFilePath(): string;

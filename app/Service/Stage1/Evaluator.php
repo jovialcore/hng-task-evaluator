@@ -37,19 +37,4 @@ final class Evaluator implements EvaluatorContract
     {
         return PROJECT_ROOT_PATH.'/storage/passed.csv';
     }
-
-    public function csvHeaderColumns(): array
-    {
-        return ['slackUsername', 'url', 'response', 'passed'];
-    }
-
-    public function csvLine(array $item): array
-    {
-        $url = $item['url'];
-        $content = json_encode($item['content']);
-        $passed = $item['passed'] ? 'true' : 'false';
-        $username = $item['content']['response']['slackUsername'];
-
-        return [$username, $url, $content, $passed];
-    }
 }
