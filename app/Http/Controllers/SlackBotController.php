@@ -28,11 +28,21 @@ final class SlackBotController extends Controller
             return new Response();
         }
 
-        $evaluator = $this->evaluator($stage);
+        $evaluateService->setEvaluator(
+            $evaluator = $this->evaluator($stage)
+        );
 
         try {
-            $data = $this->validate($request);
-            $evaluateService->evaluate([$data['url']], $evaluator);
+            $url = $this->validate($request)['url'];
+            $alreadyEvaluated = $evaluateService->hasAlreadyEvaluatedUrls([$url], $this->csvAdditionalData($request)['headers']);
+
+            if ($alreadyEvaluated) {
+                $slack->sendAlreadyEvaluatedMessage($request->get('response_url'), $url);
+
+                return new Response();
+            }
+
+            $evaluateService->evaluate([$url], $evaluator);
         } catch (ValidationException $e) {
             $errors = $e->validator->errors()->all();
 
@@ -70,16 +80,21 @@ final class SlackBotController extends Controller
         return $stage === 1;
     }
 
+    protected function csvAdditionalData(Request $request): array
+    {
+        return [
+            'headers' => ['slackProfileUrl'],
+            'line' => ['https://hng9.slack.com/team/'.$request->get('user_id')],
+        ];
+    }
+
     /**
      * @throws \League\Csv\CannotInsertRecord
      */
     protected function writeToCsv(Request $request, EvaluateService $service, bool $isStageOne): ?bool
     {
         $slackUsername = $request->get('user_name');
-        $additionalData = [
-            'headers' => ['slackProfileUrl'],
-            'line' => ['https://hng9.slack.com/team/'.$request->get('user_id')],
-        ];
+        $additionalData = $this->csvAdditionalData($request);
 
         // Maintain backwards compatibility
         if ($isStageOne) {

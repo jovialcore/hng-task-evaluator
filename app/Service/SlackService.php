@@ -16,53 +16,34 @@ final class SlackService
     public function sendEvaluationResult(string $hook, bool $passed, array $errors = []): void
     {
         $this->client->post($hook, [
-            RequestOptions::JSON => $passed ? $this->successMessage() : $this->failureMessage($errors),
+            RequestOptions::JSON => $passed
+                ? $this->oneLiner('🎉🥳 Congrats! Your task was validated and submitted! You do *NOT* need to do anything more but wait for promotion to the next stage.')
+                : $this->failureMessage($errors),
         ]);
     }
 
     public function sendStageHasEndedMessage(string $hook): void
     {
-        if (! $hook) {
-            return;
-        }
-
         $this->client->post($hook, [
-            RequestOptions::JSON => $this->stageHasEndedMessage(),
+            RequestOptions::JSON => $this->oneLiner("🥲 Submission is closed. Don't send another request to grade. *Don't make me bring out cane*. Thanks."),
         ]);
     }
 
-    protected function stageHasEndedMessage(): array
+    public function sendAlreadyEvaluatedMessage(string $hook, string $url): void
     {
-        return [
-            'response_type' => 'ephemeral',
-            'blocks' => [
-                [
-                    'type' => 'section',
-                    'text' => [
-                        'emoji' => true,
-                        'type' => 'plain_text',
-                        'text' => "🥲 Sorry, submission is closed. Please don't send another request to grade for Stage 1. Don't make me bring out cane. Thanks.",
-                    ],
-                ],
-            ],
-        ];
+        $this->client->post($hook, [
+            RequestOptions::JSON => $this->oneLiner("ℹ️ [This URL]({$url}) has already been evaluated and graded. Please wait for a final review."),
+        ]);
     }
 
-    protected function successMessage(): array
+    protected function oneLiner(string $message): array
     {
         return [
             'response_type' => 'ephemeral',
             'blocks' => [
                 [
                     'type' => 'section',
-                    'text' => [
-                        'emoji' => true,
-                        'type' => 'plain_text',
-                        'text' => '🎉🥳 Your task was validated and submitted! Congrats! You do NOT need to do anything more but wait for promotion to the next stage.',
-                    ],
-                ],
-                [
-                    'type' => 'divider',
+                    'text' => ['emoji' => true, 'type' => 'mrkdwn', 'text' => $message],
                 ],
             ],
         ];
