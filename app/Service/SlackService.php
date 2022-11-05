@@ -31,11 +31,9 @@ final class SlackService
 
     public function sendAlreadyEvaluatedMessage(string $hook, string $url): void
     {
-        echo $url;
-        echo $hook;
-        // $this->client->post($hook, [
-        //     RequestOptions::JSON => $this->oneLiner("🎯 [This URL]({$url}) has already been evaluated and graded. Please wait for a final review."),
-        // ]);
+        $this->client->post($hook, [
+            RequestOptions::JSON => $this->oneLiner("🎯 [This URL]({$url}) has already been evaluated and graded. Please wait for a final review."),
+        ]);
     }
 
     protected function oneLiner(string $message): array
@@ -45,7 +43,11 @@ final class SlackService
             'blocks' => [
                 [
                     'type' => 'section',
-                    'text' => ['emoji' => true, 'type' => 'mrkdwn', 'text' => $message],
+                    'text' => [
+                        'emoji' => true,
+                        'type' => 'mrkdwn',
+                        'text' => $message,
+                    ],
                 ],
             ],
         ];
