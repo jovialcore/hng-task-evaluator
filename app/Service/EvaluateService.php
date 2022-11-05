@@ -73,7 +73,7 @@ final class EvaluateService
             return false;
         }
 
-        $evaluations = $this->passedEvaluation();
+        $evaluations = $this->passedEvaluation()->unique(fn (array $item) => $this->normalizeUrl($item['url']));
 
         $additionalLineItem = (array) $additional['line'] ?? [];
         $additionalHeaders = (array) $additional['headers'] ?? [];
@@ -99,7 +99,7 @@ final class EvaluateService
         }
 
         $writer->insertAll(
-            array_map(fn (array $line) => array_merge($additionalLineItem, $line), $this->getCsvLines($evaluations))
+            array_map(fn (array $line) => array_merge($additionalLineItem, $line), $this->getCsvLines($this->passed, $this->failed))
         );
 
         return true;
@@ -144,12 +144,25 @@ final class EvaluateService
         return array_filter($urls, static fn (bool $item) => $item);
     }
 
-    private function getCsvLines(LazyCollection $collection): array
+    private function getCsvLines(LazyCollection $passed, LazyCollection $failed): array
     {
         $lines = [];
         $enteredUrls = [];
 
-        $collection->each(function (array $item) use (&$lines, &$enteredUrls) {
+        $bonuses = $failed->collect()
+            ->merge($passed)
+            ->mapWithKeys(fn (array $item) => [$item['url'] => $item['passed']])
+            ->filter(fn ($passed, $url) => str_contains($url, '?bonus=true'))
+            ->mapWithKeys(fn ($passed, $url) => [$this->normalizeUrl($url) => $passed])
+            ->all();
+
+        $passed = $passed->collect()
+            ->unique(fn (array $item) => $this->normalizeUrl($item['url']))
+            ->map(fn (array $item) => array_merge($item, [
+                'bonusPassed' => $bonuses[$this->normalizeUrl($item['url'])] ?? false,
+            ]));
+
+        $passed->each(function (array $item) use (&$lines, &$enteredUrls) {
             $url = $item['url'];
 
             if (! array_key_exists($url, $enteredUrls)) {

@@ -110,16 +110,14 @@ final class Evaluator implements EvaluatorContract
         $url = $item['url'];
         $passed = $item['passed'] ? 'true' : 'false';
         $username = $item['content']['response']['slackUsername'];
-        $content = ['normal' => [...$item['content']], 'bonus' => []];
-        $bonusData = $this->getEvaluationData($item['url'].'?bonus=true');
+        $content = json_encode(
+            ['normal' => [...$item['content']], 'bonus' => [
+                'request' => $this->getEvaluationData($url.'?bonus=true'),
+                'response' => $this->getContentForUrl($item['url'].'?bonus=true'),
+            ]]
+        );
+        $bonusPassed = $item['bonusPassed'] ? 'true' : 'false';
 
-        if (! empty($bonusData)) {
-            $content['bonus'] = [...$this->getContentForUrl($item['url'].'?bonus=true')];
-            $passedBonus = isset($bonusData['passed']) && $bonusData['passed'] ? 'true' : 'false';
-        }
-
-        $content = json_encode($content);
-
-        return [$username, $url, $content, $passed, $passedBonus ?? 'false'];
+        return [$username, $url, $content, $passed, $bonusPassed];
     }
 }
