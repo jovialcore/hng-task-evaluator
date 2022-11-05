@@ -17,7 +17,7 @@ final class SlackService
     {
         $this->client->post($hook, [
             RequestOptions::JSON => $passed
-                ? $this->oneLiner('🎉🥳 Congrats! Your task was validated and submitted! You do *NOT* need to do anything more but wait for promotion to the next stage.')
+                ? $this->oneLiner('🎉🥳 Congrats! Your task was validated and submitted! You do NOT need to do anything more but wait for promotion to the next stage.')
                 : $this->failureMessage($errors),
         ]);
     }
@@ -25,14 +25,14 @@ final class SlackService
     public function sendStageHasEndedMessage(string $hook): void
     {
         $this->client->post($hook, [
-            RequestOptions::JSON => $this->oneLiner("🥲 Submission is closed. Don't send another request to grade. *Don't make me bring out cane*. Thanks."),
+            RequestOptions::JSON => $this->oneLiner("🥲 Submission is closed. Don't send another request to grade. Don't make me bring out cane. Thanks."),
         ]);
     }
 
-    public function sendAlreadyEvaluatedMessage(string $hook, string $url): void
+    public function sendAlreadyEvaluatedMessage(string $hook): void
     {
         $this->client->post($hook, [
-            RequestOptions::JSON => $this->oneLiner("🎯 [This URL]({$url}) has already been evaluated and graded. Please wait for a final review."),
+            RequestOptions::JSON => $this->oneLiner('🎯 This URL has already been evaluated and graded. Please wait for a final review.'),
         ]);
     }
 
