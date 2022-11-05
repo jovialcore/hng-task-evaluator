@@ -44,9 +44,14 @@ final class EvaluateService
         return empty($this->failedErrors($filterIgnorableErrors)) && $this->passedEvaluation()->isNotEmpty();
     }
 
-    public function evaluate(array $urls, Evaluator $evaluator): void
+    public function setEvaluator(Evaluator $evaluator): void
     {
         $this->evaluator = $evaluator;
+    }
+
+    public function evaluate(array $urls, Evaluator $evaluator): void
+    {
+        $this->evaluator ??= $evaluator;
         $results = $evaluator->fetch($urls, APP_DEBUG);
 
         $collection = LazyCollection::make(function () use ($results, $evaluator) {
@@ -77,7 +82,7 @@ final class EvaluateService
         $csvHeaderColumns = array_merge($additionalHeaders, $this->evaluator->csvHeaderColumns());
 
         if ($csvFileExists) {
-            $existingUrls = $this->getUniqueUrlHashMap($evaluations, $csvHeaderColumns);
+            $existingUrls = $this->getUniqueUrlHashMap($evaluations->map(fn ($item) => $item['url'])->all(), $csvHeaderColumns);
             $evaluations = $evaluations->filter(
                 fn (array $item) => ($existingUrls[$this->normalizeUrl($item['url'])] ?? false) === false
             );
@@ -100,15 +105,33 @@ final class EvaluateService
         return true;
     }
 
+    public function hasAlreadyEvaluatedUrls(array $insertUrls, array $additionalHeaders): bool
+    {
+        $csvFileExists = file_exists($this->evaluator->csvFilePath());
+
+        if (! $csvFileExists) {
+            return false;
+        }
+
+        $csvHeaderColumns = array_merge($additionalHeaders, $this->evaluator->csvHeaderColumns());
+        $existingUrls = $this->getUniqueUrlHashMap($insertUrls, $csvHeaderColumns);
+        $evaluations = array_filter(
+            $insertUrls,
+            fn (string $url) => ($existingUrls[$this->normalizeUrl($url)] ?? false) === false
+        );
+
+        return empty($evaluations);
+    }
+
     public function normalizeUrl(string $url): string
     {
         return rtrim(explode('?', $url)[0], '/').'/';
     }
 
-    private function getUniqueUrlHashMap(LazyCollection $evaluations, array $header): array
+    private function getUniqueUrlHashMap(array $insertUrls, array $header): array
     {
         $urls = [];
-        $insertUrls = $evaluations->map(fn (array $item) => $this->normalizeUrl($item['url']))->toArray();
+        $insertUrls = array_map(fn (string $url) => $this->normalizeUrl($url), $insertUrls);
 
         $reader = Reader::createFromStream(fopen($this->evaluator->csvFilePath(), 'r+'))->setHeaderOffset(0);
         $records = $reader->getRecords($header);
