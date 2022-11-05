@@ -32,7 +32,7 @@ final class SlackService
     public function sendAlreadyEvaluatedMessage(string $hook, string $url): void
     {
         $this->client->post($hook, [
-            RequestOptions::JSON => $this->oneLiner("ℹ️ [This URL]({$url}) has already been evaluated and graded. Please wait for a final review."),
+            RequestOptions::JSON => $this->oneLiner("🎯 [This URL]({$url}) has already been evaluated and graded. Please wait for a final review."),
         ]);
     }
 

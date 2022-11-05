@@ -36,13 +36,11 @@ final class SlackBotController extends Controller
             $url = $this->validate($request)['url'];
             $alreadyEvaluated = $evaluateService->hasAlreadyEvaluatedUrls([$url], $this->csvAdditionalData($request)['headers']);
 
-            error_log('Already evaluated: '.json_encode($alreadyEvaluated));
+            if ($alreadyEvaluated) {
+                $slack->sendAlreadyEvaluatedMessage($request->get('response_url'), $url);
 
-            // if ($alreadyEvaluated) {
-            //     $slack->sendAlreadyEvaluatedMessage($request->get('response_url'), $url);
-
-            //     return new Response();
-            // }
+                return new Response();
+            }
 
             $evaluateService->evaluate([$url], $evaluator);
         } catch (ValidationException $e) {
