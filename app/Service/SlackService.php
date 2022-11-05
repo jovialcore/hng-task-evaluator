@@ -45,7 +45,7 @@ final class SlackService
                     'type' => 'section',
                     'text' => [
                         'emoji' => true,
-                        'type' => 'mrkdwn',
+                        'type' => 'plain_text',
                         'text' => $message,
                     ],
                 ],
