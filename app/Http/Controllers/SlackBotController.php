@@ -22,11 +22,11 @@ final class SlackBotController extends Controller
         $errors = [];
         $stage = intval($request->route('stage', 1));
 
-        if ($this->stageHasEnded($stage)) {
-            $slack->sendStageHasEndedMessage($request->get('response_url', ''));
+        // if ($this->stageHasEnded($stage)) {
+        //     $slack->sendStageHasEndedMessage($request->get('response_url', ''));
 
-            return new Response();
-        }
+        //     return new Response();
+        // }
 
         $evaluateService->setEvaluator(
             $evaluator = $this->evaluator($stage)

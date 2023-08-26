@@ -61,7 +61,7 @@ final class EvaluateService
         });
 
         $this->passed = $collection->filter(fn ($item) => $item['passed']);
-        $this->failed = $collection->filter(fn ($item) => ! $item['passed']);
+        $this->failed = $collection->filter(fn ($item) => !$item['passed']);
     }
 
     /**
@@ -69,7 +69,7 @@ final class EvaluateService
      */
     public function writeToCsv(array $additional = [], array $options = []): ?bool
     {
-        if (! $this->allSuccessful($options['filterIgnorableErrors'] ?? false)) {
+        if (!$this->allSuccessful($options['filterIgnorableErrors'] ?? false)) {
             return false;
         }
 
@@ -94,7 +94,7 @@ final class EvaluateService
 
         $writer = Writer::createFromPath($this->evaluator->csvFilePath(), 'a+');
 
-        if (! $csvFileExists) {
+        if (!$csvFileExists) {
             $writer->insertOne($csvHeaderColumns);
         }
 
@@ -109,7 +109,7 @@ final class EvaluateService
     {
         $csvFileExists = file_exists($this->evaluator->csvFilePath());
 
-        if (! $csvFileExists) {
+        if (!$csvFileExists) {
             return false;
         }
 
@@ -125,7 +125,7 @@ final class EvaluateService
 
     public function normalizeUrl(string $url): string
     {
-        return rtrim(explode('?', $url)[0], '/').'/';
+        return rtrim(explode('?', $url)[0], '/') . '/';
     }
 
     private function getUniqueUrlHashMap(array $insertUrls, array $header): array
@@ -165,7 +165,7 @@ final class EvaluateService
         $passed->each(function (array $item) use (&$lines, &$enteredUrls) {
             $url = $item['url'];
 
-            if (! array_key_exists($url, $enteredUrls)) {
+            if (!array_key_exists($url, $enteredUrls)) {
                 $enteredUrls[$url] = true;
                 $lines[] = $this->evaluator->csvLine($item);
             }
