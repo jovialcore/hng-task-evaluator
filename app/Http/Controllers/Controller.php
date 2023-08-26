@@ -12,6 +12,7 @@ use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
+    
     protected function evaluator(int $stage): Evaluator
     {
         return match ($stage) {
