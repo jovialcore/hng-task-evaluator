@@ -48,7 +48,6 @@ final class EvaluateService
     {
         $this->evaluator = $evaluator;
     }
-
     public function evaluate(array $urls, Evaluator $evaluator): void
     {
         $this->evaluator ??= $evaluator;
