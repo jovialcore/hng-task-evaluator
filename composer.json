@@ -25,7 +25,7 @@
 
   "scripts": {
     "post-install-cmd": [
-      "chmod -R 777 storage"
+      "chmod -R 755 storage"
     ]
   }
 }
