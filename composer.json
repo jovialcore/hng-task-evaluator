@@ -22,10 +22,12 @@
     "league/csv": "^9.0",
     "filp/whoops": "^2.14"
   },
-
+  "require-dev": {
+    "heroku/heroku-buildpack-php": "^226.0"
+  },
   "scripts": {
     "post-install-cmd": [
-      "chmod -R 755 storage"
+      "chmod -R 777 storage"
     ]
   }
 }
