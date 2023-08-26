@@ -18,6 +18,6 @@ jobs:
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
         server: ftp.jovialcore.tech
-        username: Dev@api.jovialcore.tech
+        username: bot@hng.jovialcore.tech
         password: ${{ secrets.ftp_password }}
-        server_dir: /api.jovialcore.tech/
+        server_dir: /hng.jovialcore.tech/
