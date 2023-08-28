@@ -70,7 +70,8 @@ trait HandlesAndProvidesData
         $url = $item['url'];
         $content = json_encode($item['content']);
         $passed = $item['passed'] ? 'true' : 'false';
-        $username = $item['content']['response']['slackUsername'];
+        
+        $username = $item['content']['response']['slack_name'];
 
         return [$username, $url, $content, $passed];
     }
