@@ -13,13 +13,16 @@ final class Evaluator implements EvaluatorContract
 
     public function rules(string $url): array
     {
+
+
         return [
             // API response field validation
-            'bio' => ['required', 'string'],
-            'age' => ['required', 'integer'],
-            'backend' => ['required', 'boolean'],
-            'slackUsername' => ['required', 'string'],
-
+            'slack_name' => ['required', 'string'],
+            'utc_time' => ['required', 'date_format:Y-m-d H:i:s'],
+            'track' => ['required', 'string', 'in:backend'],
+            'github_file_url' => ['required', 'url'],
+            'github_repo_url' => ['required', 'url'],
+        
             // Server response header validation
             'status_code' => ['required', 'integer', 'in:200'],
             'content_type' => ['required', 'string', 'regex:/^application\/json/'],
