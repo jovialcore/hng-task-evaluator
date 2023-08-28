@@ -1,1 +1,2 @@
 submitter,slackUsername,url,response,passed
+chidideveloper,@akjesus,http://stage-one.eu-4.evennode.com/api?slack_name=akjesus&track=backend,"{""request"":[],""response"":{""slack_name"":""@akjesus"",""current_day"":""Monday"",""utc_time"":""2023-08-28T19:44:53Z"",""track"":""backend"",""github_file_url"":""https:\/\/github.com\/akjesus\/HNG"",""github_repo_url"":""https:\/\/github.com\/akjesus\/HNG\/blob\/master\/server.js"",""status_code"":""200""}}",true

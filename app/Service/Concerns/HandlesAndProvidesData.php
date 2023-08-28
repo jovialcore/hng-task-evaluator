@@ -56,7 +56,7 @@ trait HandlesAndProvidesData
     protected function http(): Client
     {
         return new Client([
-            'timeout' => 5, 'http_errors' => false, 'connect_timeout' => 3,
+            'timeout' => 6, 'http_errors' => false, 'connect_timeout' => 6,
         ]);
     }
 
