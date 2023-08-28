@@ -15,13 +15,9 @@ trait HandlesAndProvidesData
     protected array $evaluationData = [];
 
     public function data(Response $response, string $url): array
-
     {
-
-        //  ?? 👀
         $this->content[$url] ??= $this->getContent($response, $url);
 
-// dd($this->getContent($response, $url));
         return [
             ...$this->content[$url],
             'status_code' => $response->getStatusCode(),
@@ -31,12 +27,9 @@ trait HandlesAndProvidesData
 
     public function getContent(Response $response, string $url): array
     {
-
         $content = $this->getContentForUrl($url);
-        
-        // why do you have to check if it is empty ? what's happening? looks like the get async did not actually work or so ?
+
         if (empty($content)) {
-         
             $this->content[$url] = (array) json_decode($response->getBody()->getContents(), true) ?? [];
         }
 
@@ -50,7 +43,6 @@ trait HandlesAndProvidesData
 
     public function fetch(array $urls): array
     {
-
         return Utils::settle(
             collect($urls)->mapWithKeys(fn (string $url) => [$url => $this->http()->getAsync($url)])->toArray()
         )->wait();
