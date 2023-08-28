@@ -45,14 +45,16 @@ final class Evaluator implements EvaluatorContract
 
     public function fetch(array $urls, bool $debug = false): array
     {
+       
         $data = Arr::except($this->data, 'result');
         $dataBonus = Arr::except($this->dataBonus, 'result');
-
+      
         if ($debug) {
             return $this->fetchDebug();
         }
 
         return Utils::settle(
+         
             collect($urls)->mapWithKeys(function (string $url) use ($data, $dataBonus) {
                 $bonusUrl = $url.'?bonus=true';
                 $this->evaluationData[$url] = $this->data;
