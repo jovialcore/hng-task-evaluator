@@ -14,15 +14,18 @@ final class Evaluator implements EvaluatorContract
     public function rules(string $url): array
     {
 
+        $today = date("l");
+        $time = gmdate('Y-m-d\TH:i:s\Z');
 
         return [
             // API response field validation
             'slack_name' => ['required', 'string'],
-            'utc_time' => ['required', 'date_format:Y-m-d H:i:s'],
+            'utc_time' => ['required', "in:{$time}"],
             'track' => ['required', 'string', 'in:backend'],
             'github_file_url' => ['required', 'url'],
             'github_repo_url' => ['required', 'url'],
-        
+            'current_day' => ['required', 'string', "in:{$today}"],
+
             // Server response header validation
             'status_code' => ['required', 'integer', 'in:200'],
             'content_type' => ['required', 'string', 'regex:/^application\/json/'],
@@ -36,8 +39,9 @@ final class Evaluator implements EvaluatorContract
         ];
     }
 
+
     public function csvFilePath(): string
     {
-        return PROJECT_ROOT_PATH.'/storage/passed.csv';
+        return PROJECT_ROOT_PATH . '/storage/passed.csv';
     }
 }
