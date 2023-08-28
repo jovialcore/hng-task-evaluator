@@ -33,14 +33,16 @@ final class EvaluateService
 
     public function failedErrors(bool $filterIgnorableErrors = false): array
     {
+      
         return $this->failed->when(
             $filterIgnorableErrors,
             static fn (LazyCollection $items) => $items->filter(fn (array $item) => $item['canIgnore'] === false)
-        )->map(fn (array $item) => $item['errors'])->flatten()->all();
+        )->map(fn (array $item) => $item['errors'])->flatten()->all(); //  laravel pluck()->values() can be used here to achieve same thing
     }
 
     public function allSuccessful(bool $filterIgnorableErrors = false): bool
     {
+        // if something is false, it is equal to empty
         return empty($this->failedErrors($filterIgnorableErrors)) && $this->passedEvaluation()->isNotEmpty();
     }
 
@@ -50,11 +52,15 @@ final class EvaluateService
     }
     public function evaluate(array $urls, Evaluator $evaluator): void
     {
+
         $this->evaluator ??= $evaluator;
+
         $results = $evaluator->fetch($urls, APP_DEBUG);
+
 
         $collection = LazyCollection::make(function () use ($results, $evaluator) {
             foreach ($results as $url => $result) {
+                /// insummary, get the body contents of that request
                 yield $this->parseAsyncResponses($result, $url, $evaluator);
             }
         });
@@ -179,19 +185,25 @@ final class EvaluateService
         $response = $result['value'] ?? null;
 
         if ($result['state'] !== 'fulfilled' || $response === null) {
+            // this will return an undefined array key when the condition above is true
             $errors = [$result['reason']?->getMessage() ?? 'An unknown error occurred'];
 
             return $this->buildPayload($url, $errors, false, []);
         }
 
+        // php list() method with keys is happening here
         ['passed' => $passed, 'errors' => $errors] = $this->validator->validate(
+            // get the body contents from the request and let laravel validate validate the data
             $evaluator->data($response, $url),
-            $evaluator->rules($url),
-            $evaluator->messages()
+            $evaluator->rules($url), // not seeing the use of $url parameter here as it is not being used 
+            $evaluator->messages() // error messages from laravel val
         );
+        // dd($response);
 
         $isBonus = str_contains($url, '?bonus=true');
+
         $content = [
+            /// this will return empty often
             'request' => $evaluator->getEvaluationData($url),
             'response' => $evaluator->getContent($response, $url),
         ];
