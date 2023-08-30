@@ -13,7 +13,7 @@ final class Evaluator implements EvaluatorContract
 
     public function rules(string $url): array
     {
-
+        
         $today = date("l");
         $time = gmdate('Y-m-d\TH:i:s\Z');
        
@@ -35,7 +35,7 @@ final class Evaluator implements EvaluatorContract
     public function messages(): array
     {
         return [
-            'in' => 'The :attribute must be one of the following types: :values',
+            'in' => 'The :attribute should be in this format : :values',
         ];
     }
 

@@ -20,7 +20,8 @@
     "illuminate/translation": "^9.37",
     "illuminate/validation": "^9.37",
     "league/csv": "^9.0",
-    "filp/whoops": "^2.14"
+    "filp/whoops": "^2.14",
+    "cloudinary/cloudinary_php": "^2"
   },
   "require-dev": {
     "heroku/heroku-buildpack-php": "^226.0"
