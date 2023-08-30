@@ -20,7 +20,7 @@ final class SlackBotController extends Controller
     public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
         $errors = [];
-        $stage = intval($request->route('stage', 1));
+        $stage = intval($request->route('stage', 2));
 
         // if ($this->stageHasEnded($stage)) {
         //     $slack->sendStageHasEndedMessage($request->get('response_url', ''));
