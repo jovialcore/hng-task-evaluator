@@ -15,7 +15,7 @@ $router->get('/passed', fn () => new Response(
     HttpFoundationResponse::HTTP_OK,
     [
         'Content-Type' => 'text/csv',
-        'Content-Disposition' => 'attachment; filename="passed1.csv"',
+        'Content-Disposition' => 'attachment; filename="passed2.csv"',
     ]
 ));
 
