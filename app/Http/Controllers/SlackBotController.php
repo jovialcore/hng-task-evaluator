@@ -78,7 +78,7 @@ final class SlackBotController extends Controller
     protected function stageHasEnded(int $stage): bool
     {
                 // return $stage === 1;
-            return in_array($stage, [1, 2]);
+            return in_array($stage, [ 2]);
     }
 
     protected function csvAdditionalData(Request $request): array
