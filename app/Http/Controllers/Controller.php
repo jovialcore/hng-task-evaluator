@@ -21,6 +21,7 @@ class Controller extends BaseController
                 (new Stage2\TestDataSample())->random(),
                 (new Stage2\TestDataSample(bonus: true))->random()
             ),
+            
             default => throw new InvalidArgumentException('Invalid stage'),
         };
     }
