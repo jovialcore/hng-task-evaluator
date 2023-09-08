@@ -11,7 +11,7 @@ $router->post('/slackbot/{stage}', SlackBotController::class);
 $router->post('/slackbot', SlackBotController::class);
 
 $router->get('/passed', fn () => new Response(
-    file_get_contents(PROJECT_ROOT_PATH.'/storage/passed.csv'),
+    file_get_contents(PROJECT_ROOT_PATH . '/storage/passed.csv'),
     HttpFoundationResponse::HTTP_OK,
     [
         'Content-Type' => 'text/csv',

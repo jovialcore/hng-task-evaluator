@@ -19,7 +19,7 @@ final class Evaluator implements EvaluatorContract
        
         return [
             // API response field validation
-            'slack_name' => ['required', 'string'],
+            'slack_name' => ['required', 'string', ],
             'utc_time' => ['required', "in:{$time}"],
             'track' => ['required', 'string', 'in:backend'],
             'github_file_url' => ['required', 'url'],

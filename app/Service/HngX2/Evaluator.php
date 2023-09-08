@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Service\HngX2;
 
 use App\Service\Concerns\HandlesAndProvidesData;
+use App\Service\Contracts\Evaluator as ContractsEvaluator;
 use GuzzleHttp\Promise\Utils;
+use GuzzleHttp\Psr7\Response;
 
-class Evaluator
+class Evaluator implements ContractsEvaluator
+
 {
 
     use HandlesAndProvidesData {
@@ -21,7 +24,7 @@ class Evaluator
             'name' => ['required', 'string'],
         ];
     }
-    public function post($url)
+    public function fetch($url): array
     {
 
         $formData = [
@@ -44,6 +47,43 @@ class Evaluator
 
     // if fulfilled state, now make a read request to that endpoint
 
+    public function data(Response $response, string $url): array
+    {
+        return [];
+    }
 
+    public function messages(): array
+    {
+        return [];
+    }
+    public function getContent(Response $response, string $url): array
+    {
 
+        return [];
+    }
+
+    public function getContentForUrl(string $url): array
+    {
+        return [];
+    }
+
+    public function getEvaluationData(string $url): array
+    {
+        return [];
+    }
+
+    public function csvFilepath(): string
+    {
+        return '';
+    }
+
+    public function csvHeaderColumns(): array
+    {
+        return [];
+    }
+
+    public function csvLine(array $item): array
+    {
+        return [];
+    }
 }

@@ -22,6 +22,7 @@ final class SlackBotController extends Controller
         $errors = [];
         $stage = intval($request->route('stage', 1));
 
+        // dd( $stage);
         // if ($this->stageHasEnded($stage)) {
         //     $slack->sendStageHasEndedMessage($request->get('response_url', ''));
 

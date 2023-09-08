@@ -6,13 +6,14 @@ namespace App\Http\Controllers;
 
 use App\Service\Stage1;
 use App\Service\Stage2;
+use App\Service\HngX2;
 use InvalidArgumentException;
 use App\Service\Contracts\Evaluator;
 use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
-    
+
     protected function evaluator(int $stage): Evaluator
     {
         return match ($stage) {
@@ -21,7 +22,8 @@ class Controller extends BaseController
                 (new Stage2\TestDataSample())->random(),
                 (new Stage2\TestDataSample(bonus: true))->random()
             ),
-            
+            3 => new Hngx2\Evaluator(),
+
             default => throw new InvalidArgumentException('Invalid stage'),
         };
     }
