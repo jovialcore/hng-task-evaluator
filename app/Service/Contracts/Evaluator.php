@@ -14,6 +14,10 @@ interface Evaluator
 
     public function fetch(array $urls): array;
 
+    public function post(array $urls): array;
+
+    public function read(array $urls): array;
+
     public function messages(): array;
 
     public function getContent(Response $response, string $url): array;

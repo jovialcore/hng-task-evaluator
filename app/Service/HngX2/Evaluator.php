@@ -9,6 +9,7 @@ use App\Service\Contracts\Evaluator as ContractsEvaluator;
 use GuzzleHttp\Promise\Utils;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
+use Illuminate\Http\JsonResponse;
 
 class Evaluator implements ContractsEvaluator
 
@@ -18,9 +19,17 @@ class Evaluator implements ContractsEvaluator
         data as protected traitData;
         getContent as protected traitGetContent;
     }
+
+    protected  $formData = [
+        'name' => 'jovialcore'
+    ];
+
+    protected  $newData = [
+        'name' => 'Elon Musk'
+    ];
     public function rules(string $url): array
     {
-        
+
 
         return [
 
@@ -29,21 +38,64 @@ class Evaluator implements ContractsEvaluator
     }
     public function fetch($url): array
     {
-    
+
         $url = $url[0];
-      
+
         $formData = [
             'name' => 'Elon Musk'
         ];
         $promises = [
-            'url' => $this->http()->postAsync($url, [RequestOptions::JSON => $formData])
+            'url' => $this->http()->getAsync($url)
         ];
 
         $response = Utils::settle($promises)->wait();
 
-        dd( json_decode($response['url']['value']->getBody()->getContents(), true));
+        return json_decode($response['url']['value']->getBody()->getContents(), true);
     }
 
+
+    public function post($urls): array
+    {
+
+        $url = $urls[0];
+
+        $promises = [
+            'url' => $this->http()->postAsync($url, [RequestOptions::JSON => $this->formData])
+        ];
+
+        $response = Utils::settle($promises)->wait();
+
+        return  json_decode($response['url']['value']->getBody()->getContents(), true);
+    }
+
+
+
+    public function read($urls): array
+    {
+
+
+        // dd($urls);
+        $this->post($urls);
+        $id  = $this->fetch($urls)[0]['id'];
+        $name  = $this->fetch($urls)[0]['name'];
+        $url = $urls[0];
+    
+
+        // check if reading went through // if there is an error, I will have to reshufflw the data i am using 
+        if ($name != $this->formData['name']) {
+            dd(new JsonResponse(['message' => "I can't find {$name} in your database"]));
+        }
+        $patchUrl = $url . "/{$id}";
+
+
+        $promises = [
+            'url' => $this->http()->putAsync($patchUrl, [RequestOptions::JSON => $this->newData])
+        ];
+
+        $response = Utils::settle($promises)->wait();
+
+        dd(json_decode($response['url']['value']->getBody()->getContents(), true));
+    }
     // we need to make sure we are validating the right url link too 
 
     // make a post request to their app
