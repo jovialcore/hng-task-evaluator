@@ -16,6 +16,7 @@ trait HandlesAndProvidesData
 
     public function data(Response $response, string $url): array
     {
+
         $this->content[$url] ??= $this->getContent($response, $url);
 
         return [
@@ -27,12 +28,15 @@ trait HandlesAndProvidesData
 
     public function getContent(Response $response, string $url): array
     {
+
         $content = $this->getContentForUrl($url);
+
 
         if (empty($content)) {
             $this->content[$url] = (array) json_decode($response->getBody()->getContents(), true) ?? [];
         }
 
+        // dd($this->content[$url]);
         return $this->content[$url];
     }
 
@@ -56,7 +60,7 @@ trait HandlesAndProvidesData
     protected function http(): Client
     {
         return new Client([
-            'timeout' => 6, 'http_errors' => false, 'connect_timeout' => 6,
+            'timeout' => 30, 'http_errors' => false, 'connect_timeout' => 6,
             'headers' => [
                 'Content-Type' => 'application/json',
             ],
@@ -73,7 +77,7 @@ trait HandlesAndProvidesData
         $url = $item['url'];
         $content = json_encode($item['content']);
         $passed = $item['passed'] ? 'true' : 'false';
-        
+
         $username = $item['content']['response']['slack_name'];
 
         return [$username, $url, $content, $passed];

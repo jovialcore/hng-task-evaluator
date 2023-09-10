@@ -17,7 +17,7 @@ final class Evaluator implements EvaluatorContract
         $today = gmdate("l");
         $time = gmdate('Y-m-d\TH:i:s\Z');
        
-        dd($today);
+     
         return [
             // API response field validation
             'slack_name' => ['required', 'string', ],

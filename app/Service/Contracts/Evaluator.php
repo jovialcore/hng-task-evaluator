@@ -16,7 +16,9 @@ interface Evaluator
 
     public function post(array $urls): array;
 
-    public function read(array $urls): array;
+    public function update(array $urls): array;
+
+    public function readUpdate(array $urls): array;
 
     public function messages(): array;
 

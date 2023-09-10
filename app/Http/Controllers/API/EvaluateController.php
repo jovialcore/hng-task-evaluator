@@ -21,9 +21,9 @@ final class EvaluateController extends Controller
             'urls.*' => 'required|url',
         ])['urls'];
 
-            dd($this->evaluator($stage)->read($urls)); // hngx stage 3
+            dd($this->evaluator($stage)->readUpdate($urls)); // hngx stage 3
 
-       // $evaluateService->evaluate(array_unique($urls), $this->evaluator($stage));
+        $evaluateService->evaluate(array_unique($urls), $this->evaluator($stage));
 
         $results = $evaluateService->passedEvaluation()->merge($evaluateService->failedEvaluation())->toArray();
 

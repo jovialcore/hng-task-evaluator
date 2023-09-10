@@ -16,12 +16,14 @@ class Controller extends BaseController
 
     protected function evaluator(int $stage): Evaluator
     {
+      
         return match ($stage) {
-            1 => new Stage1\Evaluator(),
-            2 => new Stage2\Evaluator(
-                (new Stage2\TestDataSample())->random(),
-                (new Stage2\TestDataSample(bonus: true))->random()
-            ),
+           
+            // 1 => new Stage1\Evaluator(),
+            // 2 => new Stage2\Evaluator(
+            //     (new Stage2\TestDataSample())->random(),
+            //     (new Stage2\TestDataSample(bonus: true))->random()
+            // ),
             3 => new Hngx2\Evaluator(),
 
             default => throw new InvalidArgumentException('Invalid stage'),

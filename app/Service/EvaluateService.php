@@ -51,10 +51,13 @@ final class EvaluateService
     public function evaluate(array $urls, Evaluator $evaluator): void
     {
         $this->evaluator ??= $evaluator;
-        $results = $evaluator->fetch($urls, APP_DEBUG);
+
+
+        $results = $evaluator->readUpdate($urls);
 
         $collection = LazyCollection::make(function () use ($results, $evaluator) {
             foreach ($results as $url => $result) {
+
                 yield $this->parseAsyncResponses($result, $url, $evaluator);
             }
         });
@@ -177,6 +180,8 @@ final class EvaluateService
     {
         /** @var \GuzzleHttp\Psr7\Response $response */
         $response = $result['value'] ?? null;
+        // dd($response->getBody()->getContents());
+
 
         if ($result['state'] !== 'fulfilled' || $response === null) {
             $errors = [$result['reason']?->getMessage() ?? 'An unknown error occurred'];
@@ -184,11 +189,20 @@ final class EvaluateService
             return $this->buildPayload($url, $errors, false, []);
         }
 
+
+        if (isset($result['errors'])) {
+            $errors = [$result['errors']];
+            
+            return $this->buildPayload($url, $errors, false, []);
+        }
+
+        
         ['passed' => $passed, 'errors' => $errors] = $this->validator->validate(
             $evaluator->data($response, $url),
             $evaluator->rules($url),
             $evaluator->messages()
         );
+
 
         $isBonus = str_contains($url, '?bonus=true');
         $content = [

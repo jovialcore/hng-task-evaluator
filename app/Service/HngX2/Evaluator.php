@@ -21,12 +21,14 @@ class Evaluator implements ContractsEvaluator
     }
 
     protected  $formData = [
-        'name' => 'jovialcore'
+        'name' => 'mark essien'
     ];
 
     protected  $newData = [
-        'name' => 'Elon Musk'
+        'name' => 'naza uk'
     ];
+
+    protected  $errors = [];
     public function rules(string $url): array
     {
 
@@ -38,6 +40,7 @@ class Evaluator implements ContractsEvaluator
     }
     public function fetch($url): array
     {
+
 
         $url = $url[0];
 
@@ -70,23 +73,21 @@ class Evaluator implements ContractsEvaluator
 
 
 
-    public function read($urls): array
+    public function update($urls): array
     {
-
 
         // dd($urls);
         $this->post($urls);
         $id  = $this->fetch($urls)[0]['id'];
         $name  = $this->fetch($urls)[0]['name'];
         $url = $urls[0];
-    
+
 
         // check if reading went through // if there is an error, I will have to reshufflw the data i am using 
-        if ($name != $this->formData['name']) {
-            dd(new JsonResponse(['message' => "I can't find {$name} in your database"]));
+        if ($name == $this->formData['name']) {
+            $this->errors =  ["I can't find {$name} in your database with this id {$id} "];
         }
         $patchUrl = $url . "/{$id}";
-
 
         $promises = [
             'url' => $this->http()->putAsync($patchUrl, [RequestOptions::JSON => $this->newData])
@@ -94,55 +95,51 @@ class Evaluator implements ContractsEvaluator
 
         $response = Utils::settle($promises)->wait();
 
-        dd(json_decode($response['url']['value']->getBody()->getContents(), true));
+        return json_decode($response['url']['value']->getBody()->getContents(), true);
     }
-    // we need to make sure we are validating the right url link too 
 
-    // make a post request to their app
-
-    // by adding it to the body
-
-    // return a fulfilled state
-
-    // if fulfilled state, now make a read request to that endpoint
-
-    public function data(Response $response, string $url): array
+    public function readUpdate($urls): array
     {
-        return [];
+
+        // dd($urls);
+        $this->update($urls);
+        $id  = $this->fetch($urls)[0]['id'];
+        $name  = $this->fetch($urls)[0]['name'];
+        $url = $urls[0];
+
+
+        // check if reading went through // if there is an error, I will have to reshufflw the data i am using 
+        if ($name != $this->newData['name']) {
+            $this->errors = ["For your Update request, I can't find {$name} in your database with this id {$id} "];
+        }
+        $patchUrl = $url . "/{$id}";
+
+        $promise = Utils::settle(
+            collect($urls)->mapWithKeys(fn (string $url) => [
+                $url =>  $this->http()->deleteAsync($patchUrl, [RequestOptions::JSON => ['id' => $id]]),
+            ])->toArray()
+        )->wait();
+
+        // dd($this->errors);
+
+        $promise[$url]['errors'] =   'Something happend';
+        return $promise;
+
+        // dd(json_decode($response['url']['value']->getBody()->getContents(), true));
     }
+
+    //check for instances where post, read of put operation fails
 
     public function messages(): array
     {
-        return [];
-    }
-    public function getContent(Response $response, string $url): array
-    {
-
-        return [];
+        return [
+            'in' => 'The :attribute should be in this format : :values',
+        ];
     }
 
-    public function getContentForUrl(string $url): array
-    {
-        return [];
-    }
-
-    public function getEvaluationData(string $url): array
-    {
-        return [];
-    }
 
     public function csvFilepath(): string
     {
         return '';
-    }
-
-    public function csvHeaderColumns(): array
-    {
-        return [];
-    }
-
-    public function csvLine(array $item): array
-    {
-        return [];
     }
 }

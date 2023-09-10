@@ -19,8 +19,12 @@ final class SlackBotController extends Controller
      */
     public function __invoke(Request $request, SlackService $slack, EvaluateService $evaluateService)
     {
+
+      
         $errors = [];
         $stage = intval($request->route('stage', 1));
+
+        
 
         // dd( $stage);
         // if ($this->stageHasEnded($stage)) {
@@ -32,7 +36,7 @@ final class SlackBotController extends Controller
         $evaluateService->setEvaluator(
             $evaluator = $this->evaluator($stage)
         );
-
+        
         try {
             $url = $this->validate($request)['url'];
 
@@ -45,7 +49,7 @@ final class SlackBotController extends Controller
 
                 return new Response();
             }
-
+            
             $evaluateService->evaluate([$url], $evaluator);
         } catch (ValidationException $e) {
             $errors = $e->validator->errors()->all();
@@ -72,9 +76,9 @@ final class SlackBotController extends Controller
 
     protected function validate(Request $request): array
     {
-        $submittedUrl = preg_match('/^(https?:\/\/[^\s]+\/api)\?slack_name=[^&]+&track=(?i)backend$/', $request->get('text'), $matches) ? $matches[0] : 'invalid';
 
-
+        
+        $submittedUrl = preg_match('/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/i', $request->get('text'), $matches) ? $matches[0] : 'invalid';
 
         return Validator::make(
             ['url' => $submittedUrl, 'response_url' => $request->get('response_url')],
