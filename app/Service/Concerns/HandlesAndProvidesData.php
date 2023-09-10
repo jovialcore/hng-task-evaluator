@@ -57,6 +57,9 @@ trait HandlesAndProvidesData
     {
         return new Client([
             'timeout' => 6, 'http_errors' => false, 'connect_timeout' => 6,
+            // 'headers' => [
+            //     'Content-Type' => 'application/json',
+            // ],
         ]);
     }
 

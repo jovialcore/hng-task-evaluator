@@ -14,9 +14,10 @@ final class Evaluator implements EvaluatorContract
     public function rules(string $url): array
     {
         
-        $today = date("l");
+        $today = gmdate("l");
         $time = gmdate('Y-m-d\TH:i:s\Z');
        
+        dd($today);
         return [
             // API response field validation
             'slack_name' => ['required', 'string', ],

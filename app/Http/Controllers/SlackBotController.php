@@ -35,7 +35,9 @@ final class SlackBotController extends Controller
 
         try {
             $url = $this->validate($request)['url'];
-        
+
+          
+            // check if they have been evaluated
             $alreadyEvaluated = $evaluateService->hasAlreadyEvaluatedUrls([$url], $this->csvAdditionalData($request)['headers']);
 
             if ($alreadyEvaluated) {
@@ -47,7 +49,7 @@ final class SlackBotController extends Controller
             $evaluateService->evaluate([$url], $evaluator);
         } catch (ValidationException $e) {
             $errors = $e->validator->errors()->all();
-           
+
             if ($e->validator->errors()->has('response_url')) {
                 return new Response('Nope. We are not doing this', HttpFoundationResponse::HTTP_FORBIDDEN);
             }
@@ -63,7 +65,7 @@ final class SlackBotController extends Controller
 
         $this->sendToSlack($slack, $request, $evaluateService, $errors);
 
-     
+
 
         return new Response();
     }
@@ -72,8 +74,8 @@ final class SlackBotController extends Controller
     {
         $submittedUrl = preg_match('/^(https?:\/\/[^\s]+\/api)\?slack_name=[^&]+&track=(?i)backend$/', $request->get('text'), $matches) ? $matches[0] : 'invalid';
 
-        // dd($submittedUrl);
-       
+
+
         return Validator::make(
             ['url' => $submittedUrl, 'response_url' => $request->get('response_url')],
             ['url' => 'required|url', 'response_url' => 'required|url|starts_with:https://hooks.slack.com'],
@@ -83,15 +85,15 @@ final class SlackBotController extends Controller
 
     protected function stageHasEnded(int $stage): bool
     {
-//                 return $stage === 1;
-            return in_array($stage, [1, 2]);
+        //                 return $stage === 1;
+        return in_array($stage, [1, 2]);
     }
 
     protected function csvAdditionalData(Request $request): array
     {
         return [
             'headers' => ['slackProfileUrl'],
-            'line' => ['https://hng9.slack.com/team/'.$request->get('user_id')],
+            'line' => ['https://hng9.slack.com/team/' . $request->get('user_id')],
         ];
     }
 
@@ -109,7 +111,7 @@ final class SlackBotController extends Controller
             $additionalData['line'] = [$slackUsername];
         }
 
-        return $service->writeToCsv($additionalData, ['filterIgnorableErrors' => ! $isStageOne]);
+        return $service->writeToCsv($additionalData, ['filterIgnorableErrors' => !$isStageOne]);
     }
 
     protected function sendToSlack(SlackService $slack, Request $request, EvaluateService $evaluate, array $errors): void

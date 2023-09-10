@@ -19,6 +19,8 @@ class Evaluator implements ContractsEvaluator
     }
     public function rules(string $url): array
     {
+        
+
         return [
 
             'name' => ['required', 'string'],
@@ -26,18 +28,22 @@ class Evaluator implements ContractsEvaluator
     }
     public function fetch($url): array
     {
-
+    
+        $url = $url[0];
+      
         $formData = [
             'name' => 'Elon Musk'
         ];
         $promises = [
-            'url' => $this->http()->postAsync($url, $formData)
+            'url' => $this->http()->getAsync($url)
         ];
 
         $response = Utils::settle($promises)->wait();
 
-        dd($response['url']);
+        dd( json_decode($response['url']['value']->getBody()->getContents())[0]->name );
     }
+
+    // we need to make sure we are validating the right url link too 
 
     // make a post request to their app
 
