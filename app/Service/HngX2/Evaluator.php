@@ -8,6 +8,7 @@ use App\Service\Concerns\HandlesAndProvidesData;
 use App\Service\Contracts\Evaluator as ContractsEvaluator;
 use GuzzleHttp\Promise\Utils;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\RequestOptions;
 
 class Evaluator implements ContractsEvaluator
 
@@ -35,12 +36,12 @@ class Evaluator implements ContractsEvaluator
             'name' => 'Elon Musk'
         ];
         $promises = [
-            'url' => $this->http()->getAsync($url)
+            'url' => $this->http()->postAsync($url, [RequestOptions::JSON => $formData])
         ];
 
         $response = Utils::settle($promises)->wait();
 
-        dd( json_decode($response['url']['value']->getBody()->getContents())[0]->name );
+        dd( json_decode($response['url']['value']->getBody()->getContents(), true));
     }
 
     // we need to make sure we are validating the right url link too 
