@@ -6,6 +6,7 @@ namespace App\Service\HngX2;
 
 use App\Service\Concerns\HandlesAndProvidesData;
 use App\Service\Contracts\Evaluator as ContractsEvaluator;
+use App\Validator;
 use GuzzleHttp\Promise\Utils;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
@@ -21,11 +22,11 @@ class Evaluator implements ContractsEvaluator
     }
 
     protected  $formData = [
-        'name' => 'mark essien'
+        'name' => 'pesova'
     ];
 
     protected  $newData = [
-        'name' => 'naza uk'
+        'name' => 'uncle jo'
     ];
 
     protected  $errors = [];
@@ -33,10 +34,7 @@ class Evaluator implements ContractsEvaluator
     {
 
 
-        return [
-
-            'name' => ['required', 'string'],
-        ];
+        return [];
     }
     public function fetch($url): array
     {
@@ -84,7 +82,7 @@ class Evaluator implements ContractsEvaluator
 
 
         // check if reading went through // if there is an error, I will have to reshufflw the data i am using 
-        if ($name == $this->formData['name']) {
+        if ($name !== $this->formData['name']) {
             $this->errors =  ["I can't find {$name} in your database with this id {$id} "];
         }
         $patchUrl = $url . "/{$id}";
@@ -109,7 +107,7 @@ class Evaluator implements ContractsEvaluator
 
 
         // check if reading went through // if there is an error, I will have to reshufflw the data i am using 
-        if ($name != $this->newData['name']) {
+        if ($name !== $this->newData['name']) {
             $this->errors = ["For your Update request, I can't find {$name} in your database with this id {$id} "];
         }
         $patchUrl = $url . "/{$id}";
@@ -120,9 +118,9 @@ class Evaluator implements ContractsEvaluator
             ])->toArray()
         )->wait();
 
-        // dd($this->errors);
-
-        $promise[$url]['errors'] =   'Something happend';
+        if (!empty($this->errors)) {
+            $promise[$url]['errors'] =  $this->errors;
+        }
         return $promise;
 
         // dd(json_decode($response['url']['value']->getBody()->getContents(), true));
@@ -140,6 +138,6 @@ class Evaluator implements ContractsEvaluator
 
     public function csvFilepath(): string
     {
-        return '';
+        return PROJECT_ROOT_PATH . '/storage/passed.csv';
     }
 }

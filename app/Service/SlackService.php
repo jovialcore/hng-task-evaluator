@@ -17,7 +17,7 @@ final class SlackService
     {
         $this->client->post($hook, [
             RequestOptions::JSON => $passed
-                ? $this->oneLiner('🎉🥳 Congrats! Your task was validated and submitted! You do NOT need to do anything more but wait for promotion to the next stage.')
+                ? $this->oneLiner('🎉🥳 Congrats! You made it to stage 3 💃.  Your task was validated and submitted! You do NOT need to do anything more but wait for promotion to the next stage.')
                 : $this->failureMessage($errors),
         ]);
     }

@@ -1,2 +1,3 @@
 submitter,slackUsername,url,response,passed
 
+https://hng9.slack.com/team/U05MD9FD9TK,chidi,https://api.jovialcore.tech/api/crud,"{""request"":[],""response"":{""message"":""delete was successfull"",""status"":200}}",true

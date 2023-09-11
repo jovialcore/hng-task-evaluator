@@ -55,6 +55,7 @@ final class EvaluateService
 
         $results = $evaluator->readUpdate($urls);
 
+
         $collection = LazyCollection::make(function () use ($results, $evaluator) {
             foreach ($results as $url => $result) {
 
@@ -62,8 +63,13 @@ final class EvaluateService
             }
         });
 
+        
         $this->passed = $collection->filter(fn ($item) => $item['passed']);
+
+
         $this->failed = $collection->filter(fn ($item) => !$item['passed']);
+
+        
     }
 
     /**
@@ -190,25 +196,27 @@ final class EvaluateService
         }
 
 
-        if (isset($result['errors'])) {
+        if (!empty($errors)) {
             $errors = [$result['errors']];
             
             return $this->buildPayload($url, $errors, false, []);
         }
 
-        
+
         ['passed' => $passed, 'errors' => $errors] = $this->validator->validate(
             $evaluator->data($response, $url),
             $evaluator->rules($url),
             $evaluator->messages()
         );
-
+ 
 
         $isBonus = str_contains($url, '?bonus=true');
         $content = [
             'request' => $evaluator->getEvaluationData($url),
             'response' => $evaluator->getContent($response, $url),
         ];
+
+       
 
         return $this->buildPayload($url, $errors, $passed, $content, canIgnore: $isBonus);
     }

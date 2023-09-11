@@ -60,7 +60,7 @@ trait HandlesAndProvidesData
     protected function http(): Client
     {
         return new Client([
-            'timeout' => 30, 'http_errors' => false, 'connect_timeout' => 6,
+            'timeout' => 12, 'http_errors' => false, 'connect_timeout' => 12,
             'headers' => [
                 'Content-Type' => 'application/json',
             ],
@@ -74,11 +74,13 @@ trait HandlesAndProvidesData
 
     public function csvLine(array $item): array
     {
+
+        
         $url = $item['url'];
         $content = json_encode($item['content']);
         $passed = $item['passed'] ? 'true' : 'false';
-
-        $username = $item['content']['response']['slack_name'];
+        $username = 'chidi';
+       // $username = $item['content']['response']['slack_name'];
 
         return [$username, $url, $content, $passed];
     }

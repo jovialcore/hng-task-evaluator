@@ -37,6 +37,7 @@ final class SlackBotController extends Controller
             $evaluator = $this->evaluator($stage)
         );
         
+        
         try {
             $url = $this->validate($request)['url'];
 
